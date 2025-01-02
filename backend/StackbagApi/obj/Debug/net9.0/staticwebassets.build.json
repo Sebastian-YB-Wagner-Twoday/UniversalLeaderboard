@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "rAzuhWyfRRoOEmfELo2g6Kj+dzyC4dHZBK482o1WOkE=",
+  "Source": "StackbagApi",
+  "BasePath": "_content/StackbagApi",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
