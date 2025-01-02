@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("StackbagApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e15bb45f65f383d555b17019d190c52b4986a39e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f3895f2db256cdd8eeab5df38934fe96f543f036")]
 [assembly: System.Reflection.AssemblyProductAttribute("StackbagApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("StackbagApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
