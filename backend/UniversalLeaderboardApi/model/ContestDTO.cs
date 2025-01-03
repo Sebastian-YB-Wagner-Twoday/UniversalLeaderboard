@@ -1,12 +1,14 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 public class ContestDTO
 {
 
-    public string Name  {get; set;}
+    public required string Name  {get; set;}
     
-    public string Description  {get; set;}
+    public required string Description  {get; set;}
+
+    public RankingType RankingType  {get; set;}
+
+    public RankingOrder RankingOrder  {get; set;}
 
 } 
 

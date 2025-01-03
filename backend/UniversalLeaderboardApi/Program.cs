@@ -25,7 +25,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-var contestItems = app.MapGroup("/contestitems");
+var contestItems = app.MapGroup("/contest");
 
 contestItems.MapGet("/", async (UniversalLeaderboardDb db) =>
     await db.Contests.ToListAsync());
@@ -39,25 +39,19 @@ contestItems.MapGet("/{id}", async (int id, UniversalLeaderboardDb db) =>
 
 contestItems.MapPost("/", async (ContestDTO contest, UniversalLeaderboardDb db) =>
 {
-    //There Can Only be one contest of each Name
-    if(db.Contests.Where((contest) => contest.Name == contest.Name).Count() == 0){
 
-        var newContest = new Contest
-        {
-            Name = contest.Name,
-            Description = contest.Description
-        };
+    var newContest = new Contest
+    {
+        Name = contest.Name,
+        Description = contest.Description,
+        RankingOrder = contest.RankingOrder,
+        RankingType = contest.RankingType,
+    };
 
-        db.Contests.Add(newContest);
-        await db.SaveChangesAsync();
+    db.Contests.Add(newContest);
+    await db.SaveChangesAsync();
 
-        return Results.Created($"/{newContest.Id}", newContest);
-
-    }else{
-
-        return Results.BadRequest("Duplicate Value. There cannot be two contests with the same name");
-        
-    }
+    return Results.Created($"/{newContest.Id}", newContest);
 
 });
 
