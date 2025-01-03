@@ -32,7 +32,6 @@ await response.json().catch(e => console.log("there was an error: ", e));
 	<Auth>
 		{(session: Session) => {
 			if(session){
-				console.log(session.user)
 				if(session.user?.name){
 					 newUser(session.user?.name)
 				}
