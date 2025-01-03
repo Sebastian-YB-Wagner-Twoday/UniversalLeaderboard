@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 
 
-public class User{
+public class UserDTO{
     [Key]
     public required string UserName {get; set;}
     
-    public  List<string> contestIds {get; } = [];
 
 } 
 

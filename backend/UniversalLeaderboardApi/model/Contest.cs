@@ -22,6 +22,7 @@ public class Contest
 
     public  List<User> Contestants {get; } = [];
 
+    [NotMapped]
     public  List<ScoreEntry<int>> ScoreEntries {get; } = []; 
     
 }

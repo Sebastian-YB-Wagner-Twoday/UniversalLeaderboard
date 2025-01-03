@@ -1,11 +1,58 @@
 ---
+import type { Session } from '@auth/core/types';
 import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import { Auth, SignIn, SignOut } from 'auth-astro/components';
+
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+
+async function newUser(userName: string) {
+const body = JSON.stringify(
+		{
+			userName: userName			
+		})
+
+
+  const response = await fetch("http://localhost:5212/users", {
+    method: "POST",
+	body: body,
+	headers:{"Content-Type": "application/json"}
+  })
+
+await response.json().catch(e => console.log("there was an error: ", e));
+
+  
+}
+
 ---
 
 <Layout>
+	<Auth>
+		{(session: Session) => {
+			if(session){
+				console.log(session.user)
+				if(session.user?.name){
+					 newUser(session.user?.name)
+				}
+			}
+
+		return <>
+		  {session ? 
+			<SignOut>Logout</SignOut>
+		  :
+			<SignIn provider="github">Login</SignIn>
+		  }
+		 	<p>
+				{session ? `Logged in as ${session.user?.name}` : 'Not logged in'}
+			</p>
+		</>
+		}
+		}
+		
+	  </Auth>
+	
+
 	<Welcome />
 </Layout>

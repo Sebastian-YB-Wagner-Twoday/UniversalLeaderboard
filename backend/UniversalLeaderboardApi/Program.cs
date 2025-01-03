@@ -25,6 +25,35 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+var users = app.MapGroup("/users");
+
+users.MapGet("/", async (UniversalLeaderboardDb db) =>
+    await db.Users.ToListAsync());
+
+users.MapGet("/{id}", async (int id, UniversalLeaderboardDb db) =>
+    await db.Users.FindAsync(id)
+        is User user
+            ? Results.Ok(user)
+            : Results.NotFound());
+
+            
+users.MapPost("/", async (UserDTO userDTO, UniversalLeaderboardDb db) =>{
+    var user = await db.Users.FindAsync(userDTO.UserName);
+
+    if(user != null){
+        return Results.Ok(user);
+    }else{
+
+        var newUser = new User{UserName= userDTO.UserName};
+        db.Users.Add(newUser);
+        await db.SaveChangesAsync();
+        return Results.Created($"/{newUser.UserName}", newUser);
+    }
+
+});
+
+
+
 var contestItems = app.MapGroup("/contest");
 
 contestItems.MapGet("/", async (UniversalLeaderboardDb db) =>
