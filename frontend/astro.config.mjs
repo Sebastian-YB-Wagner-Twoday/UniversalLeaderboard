@@ -7,9 +7,11 @@ import auth from "auth-astro";
 
 import node from "@astrojs/node";
 
+import tailwind from "@astrojs/tailwind";
+
 // https://astro.build/config
 export default defineConfig({
-  integrations: [auth(), vue()],
+  integrations: [auth(), vue(), tailwind()],
 
   adapter: node({
     mode: "standalone",
