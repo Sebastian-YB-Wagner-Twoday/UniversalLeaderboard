@@ -1,6 +1,8 @@
 ---
 import type { Session } from "@auth/core/types";
 import { Auth } from "auth-astro/components";
+import CreateContestForm from "./CreateContestForm.vue";
+import LeaderBoard from "./LeaderBoard.astro";
 ---
 
 <div>
@@ -15,4 +17,8 @@ import { Auth } from "auth-astro/components";
       )
     }
   </Auth>
+
+  <CreateContestForm client:load />
+
+  <LeaderBoard :for title="dasad" />
 </div>

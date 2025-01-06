@@ -6,25 +6,27 @@ public class Contest
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid Id {get; set;}
+    public Guid Id { get; set; }
 
-    public required string Name  {get; set;}
+    public required string Name { get; set; }
 
-    public List<User> Admin {get; }= [];
+    public ICollection<Guid> Admin { get; set; } = [];
 
-    public string? Description  {get; set;}
+    public DateTime CreatedDate { get; set; }
 
-    public bool? Active  {get; set;}
+    public string? Description { get; set; }
 
-    public RankingType RankingType  {get; set;}
+    public bool? Active { get; set; }
 
-    public RankingOrder RankingOrder  {get; set;}
+    public RankingType RankingType { get; set; }
 
-    public  List<User> Contestants {get; } = [];
+    public RankingOrder RankingOrder { get; set; }
+
+    public ICollection<Guid> Contestants { get; set; } = [];
 
     [NotMapped]
-    public  List<ScoreEntry<int>> ScoreEntries {get; } = []; 
-    
+    public ICollection<ScoreEntry<int>> ScoreEntries { get; set; } = [];
+
 }
 
 

@@ -2,16 +2,16 @@
 public class ContestDTO
 {
 
-    public required string Name  {get; set;}
-    
-    public required string Description  {get; set;}
+    public required string Name { get; set; }
 
-    public required string Admin  {get; set;}
+    public required string Description { get; set; }
 
-    public RankingType RankingType  {get; set;}
+    public required string AdminEmail { get; set; }
 
-    public RankingOrder RankingOrder  {get; set;}
+    public int RankingType { get; set; }
 
-} 
+    public int RankingOrder { get; set; }
+
+}
 
 

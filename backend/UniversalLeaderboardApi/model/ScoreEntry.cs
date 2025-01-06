@@ -4,10 +4,10 @@ using Microsoft.EntityFrameworkCore;
 public class ScoreEntry<T>
 {
 
-    public required User User {get; set;}
-    
-    public required T score {get; set;}
+    public required Guid UserId { get; set; }
 
-} 
+    public required T score { get; set; }
+
+}
 
 

@@ -30,10 +30,25 @@ var users = app.MapGroup("/users");
 users.MapGet("/", async (UniversalLeaderboardDb db) =>
     await db.Users.ToListAsync());
 
-users.MapGet("/{id}", async (int id, UniversalLeaderboardDb db) =>
+users.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
     await db.Users.FindAsync(id)
         is User user
             ? Results.Ok(user)
+            : Results.NotFound());
+
+/**
+* get list of all contests related to user
+*/
+users.MapGet("/{id}/contests/{pagination}", async (string id, int pagination, UniversalLeaderboardDb db) =>
+    await db.Users.FindAsync(id)
+        is User user
+            ? Results.Ok(
+                db.Contests
+                .Where(contest => user.contestIds.Contains(contest.Id))
+                .OrderBy(contest => contest.CreatedDate)
+                .Skip(pagination * 10)
+                .Take(10)
+                .ToList())
             : Results.NotFound());
 
 
@@ -69,8 +84,9 @@ var contestItems = app.MapGroup("/contest");
 contestItems.MapGet("/", async (UniversalLeaderboardDb db) =>
     await db.Contests.ToListAsync());
 
-contestItems.MapGet("/{id}", async (int id, UniversalLeaderboardDb db) =>
-    await db.Contests.FindAsync(id)
+contestItems.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
+
+    await db.Contests.FindAsync(new Guid(id))
         is Contest contest
             ? Results.Ok(contest)
             : Results.NotFound());
@@ -78,26 +94,45 @@ contestItems.MapGet("/{id}", async (int id, UniversalLeaderboardDb db) =>
 
 contestItems.MapPost("/", async (ContestDTO contest, UniversalLeaderboardDb db) =>
 {
+    var user = await db.Users.FindAsync(contest.AdminEmail);
 
-    var newContest = new Contest
+    if (user != null)
     {
-        Name = contest.Name,
-        Description = contest.Description,
-        RankingOrder = contest.RankingOrder,
-        RankingType = contest.RankingType,
-    };
+        Console.WriteLine(contest);
 
-    db.Contests.Add(newContest);
-    await db.SaveChangesAsync();
 
-    return Results.Created($"/{newContest.Id}", newContest);
+        var newContest = new Contest
+        {
+            Name = contest.Name,
+            Description = contest.Description,
+            RankingOrder = (RankingOrder)contest.RankingOrder,
+            RankingType = (RankingType)contest.RankingType,
+            Active = false,
+            CreatedDate = new DateTime()
+        };
+
+        newContest.Admin.Add(user.Id);
+
+        db.Contests.Add(newContest);
+
+        user.contestIds.Add(newContest.Id);
+
+        await db.SaveChangesAsync();
+
+        return Results.Created($"/{newContest.Id}", newContest);
+    }
+    else
+    {
+        return Results.NotFound();
+    }
 
 });
 
 
-contestItems.MapDelete("/{id}", async (int id, UniversalLeaderboardDb db) =>
+contestItems.MapDelete("/{id}", async (string id, UniversalLeaderboardDb db) =>
 {
-    if (await db.Contests.FindAsync(id) is Contest contest)
+
+    if (await db.Contests.FindAsync(new Guid(id)) is Contest contest)
     {
         db.Contests.Remove(contest);
         await db.SaveChangesAsync();
