@@ -1,10 +1,9 @@
-using System.ComponentModel.DataAnnotations;
 
 
 public class UserDTO{
-    [Key]
     public required string UserName {get; set;}
     
+    public required string Email {get; set;}
 
 } 
 

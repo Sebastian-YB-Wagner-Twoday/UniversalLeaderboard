@@ -1,12 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 
 
-public class User{
-    [Key]
-    public required string UserName {get; set;}
-    
-    public  List<string> contestIds {get; } = [];
+public class User
+{
+    public required string UserName { get; set; }
 
-} 
+    [Key]
+    public required string Email { get; set; }
+
+    public List<string> contestIds { get; } = [];
+
+}
 
 

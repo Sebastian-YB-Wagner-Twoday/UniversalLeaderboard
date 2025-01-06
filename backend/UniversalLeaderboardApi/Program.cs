@@ -36,15 +36,25 @@ users.MapGet("/{id}", async (int id, UniversalLeaderboardDb db) =>
             ? Results.Ok(user)
             : Results.NotFound());
 
-            
-users.MapPost("/", async (UserDTO userDTO, UniversalLeaderboardDb db) =>{
+
+users.MapPost("/", async (UserDTO userDTO, UniversalLeaderboardDb db) =>
+{
     var user = await db.Users.FindAsync(userDTO.UserName);
 
-    if(user != null){
+    if (user != null)
+    {
         return Results.Ok(user);
-    }else{
+    }
+    else
+    {
 
-        var newUser = new User{UserName= userDTO.UserName};
+        var newUser =
+        new User
+        {
+            UserName = userDTO.UserName,
+            Email = userDTO.Email
+        };
+
         db.Users.Add(newUser);
         await db.SaveChangesAsync();
         return Results.Created($"/{newUser.UserName}", newUser);

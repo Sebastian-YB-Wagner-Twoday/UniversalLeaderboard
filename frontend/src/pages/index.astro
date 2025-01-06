@@ -5,13 +5,11 @@ import Layout from '../layouts/Layout.astro';
 import { Auth, SignIn, SignOut } from 'auth-astro/components';
 
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
-
-async function newUser(userName: string) {
+async function setUser(userName: string, email: string) {
 const body = JSON.stringify(
 		{
-			userName: userName			
+			userName: userName,
+			email: email			
 		})
 
 
@@ -22,8 +20,6 @@ const body = JSON.stringify(
   })
 
 await response.json().catch(e => console.log("there was an error: ", e));
-
-  
 }
 
 ---
@@ -32,8 +28,8 @@ await response.json().catch(e => console.log("there was an error: ", e));
 	<Auth>
 		{(session: Session) => {
 			if(session){
-				if(session.user?.name){
-					 newUser(session.user?.name)
+				if(session.user?.name && session.user?.email){
+					setUser(session.user?.name, session.user?.email)
 				}
 			}
 
