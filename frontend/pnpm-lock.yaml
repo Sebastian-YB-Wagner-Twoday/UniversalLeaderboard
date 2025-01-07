@@ -35,6 +35,10 @@ importers:
       vue:
         specifier: ^3.5.13
         version: 3.5.13(typescript@5.7.2)
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.7.2
 
 packages:
 

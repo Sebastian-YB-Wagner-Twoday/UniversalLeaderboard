@@ -3,22 +3,47 @@ import type { Session } from "@auth/core/types";
 import { Auth } from "auth-astro/components";
 import CreateContestForm from "./CreateContestForm.vue";
 import LeaderBoard from "./LeaderBoard.astro";
+import { getSession } from "auth-astro/server";
+import type { Contest } from "../model/Contest.model";
+
+const session = await getSession(Astro.request);
+
+const id = session?.user?.id;
+const pagination = "0";
+
+const url = "http://localhost:5212/users/" + id + "/contests/" + pagination;
+
+console.log(url);
+
+const response = await fetch(url, {
+  method: "GET",
+  headers: { "Content-Type": "application/json" },
+});
+
+const contests: Contest[] = await response
+  .json()
+  .catch((e) => console.log("there was an error: ", e));
+
 ---
 
 <div>
   <CreateContestForm client:load />
 
-  <Auth>
-    {
-      (session: Session) => (
+  <Auth
+    ><div>
+      {
+        (session: Session) => (
         <p class="text-2xl">
-          {session
+        {session
             ? `Welcome ${session.user?.name}, here are your leaderboards:`
             : "Not logged in"}
-        </p>
-      )
-    }
+        </p> 
+        <div>
+            {contests.map((contest) => <LeaderBoard contest={contest} />)}
+        </div>
+        )
+      }
 
-    <LeaderBoard :for title="dasad" />
+    </div>
   </Auth>
 </div>
