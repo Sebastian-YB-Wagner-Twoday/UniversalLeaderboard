@@ -6,6 +6,8 @@ import LeaderBoard from "./LeaderBoard.astro";
 ---
 
 <div>
+  <CreateContestForm client:load />
+
   <Auth>
     {
       (session: Session) => (
@@ -16,9 +18,7 @@ import LeaderBoard from "./LeaderBoard.astro";
         </p>
       )
     }
+
+    <LeaderBoard :for title="dasad" />
   </Auth>
-
-  <CreateContestForm client:load />
-
-  <LeaderBoard :for title="dasad" />
 </div>

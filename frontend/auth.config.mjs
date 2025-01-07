@@ -11,4 +11,27 @@ export default defineConfig({
       redirectProxyUrl: "http://localhost:4321/api/auth/setup ",
     }),
   ],
+  callbacks: {
+    async session({ session }) {
+      const body = JSON.stringify({
+        userName: session.user.name,
+        email: session.user.email,
+      });
+
+      const response = await fetch("http://localhost:5212/users", {
+        method: "POST",
+        body: body,
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const userInfo = await response
+        .json()
+        .catch((e) => console.log("there was an error: ", e));
+
+      if (session?.user) {
+        session.user.id = userInfo.id;
+      }
+      return session;
+    },
+  },
 });

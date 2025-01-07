@@ -6,7 +6,7 @@ public class ContestDTO
 
     public required string Description { get; set; }
 
-    public required string AdminEmail { get; set; }
+    public required string AdminId { get; set; }
 
     public int RankingType { get; set; }
 

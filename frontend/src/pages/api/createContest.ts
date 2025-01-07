@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request }) => {
   const body = JSON.stringify({
     name: name,
     description: description,
-    adminEmail: session?.user?.email,
+    AdminId: session?.user?.id,
     rankingType: rankingType,
     rankingOrder: rankingOrder,
   });
@@ -33,6 +33,5 @@ export const POST: APIRoute = async ({ request }) => {
     headers: { "Content-Type": "application/json" },
   });
 
-  // Do something with the data, then return a success response
   return response;
 };

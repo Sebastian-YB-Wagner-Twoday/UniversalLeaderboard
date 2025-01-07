@@ -4,21 +4,6 @@ import Layout from "../layouts/Layout.astro";
 import { Auth, SignIn, SignOut } from "auth-astro/components";
 import Dashboard from "../components/Dashboard.astro";
 import background from "../assets/background.svg";
-
-async function setUser(userName: string, email: string) {
-  const body = JSON.stringify({
-    userName: userName,
-    email: email,
-  });
-
-  const response = await fetch("http://localhost:5212/users", {
-    method: "POST",
-    body: body,
-    headers: { "Content-Type": "application/json" },
-  });
-
-  await response.json().catch((e) => console.log("there was an error: ", e));
-}
 ---
 
 <Layout>
@@ -32,12 +17,6 @@ async function setUser(userName: string, email: string) {
     <Auth>
       {
         (session: Session) => {
-          if (session) {
-            if (session.user?.name && session.user?.email) {
-              setUser(session.user?.name, session.user?.email);
-            }
-          }
-
           return (
             <>
               {session ? (

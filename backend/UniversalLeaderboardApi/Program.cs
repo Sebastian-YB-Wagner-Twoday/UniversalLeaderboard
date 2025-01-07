@@ -31,7 +31,7 @@ users.MapGet("/", async (UniversalLeaderboardDb db) =>
     await db.Users.ToListAsync());
 
 users.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
-    await db.Users.FindAsync(id)
+    await db.Users.FindAsync(new Guid(id))
         is User user
             ? Results.Ok(user)
             : Results.NotFound());
@@ -40,7 +40,7 @@ users.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
 * get list of all contests related to user
 */
 users.MapGet("/{id}/contests/{pagination}", async (string id, int pagination, UniversalLeaderboardDb db) =>
-    await db.Users.FindAsync(id)
+    await db.Users.FindAsync(new Guid(id))
         is User user
             ? Results.Ok(
                 db.Contests
@@ -54,15 +54,15 @@ users.MapGet("/{id}/contests/{pagination}", async (string id, int pagination, Un
 
 users.MapPost("/", async (UserDTO userDTO, UniversalLeaderboardDb db) =>
 {
-    var user = await db.Users.FindAsync(userDTO.UserName);
+    var hasUser = await db.Users.AnyAsync(user => user.Email == userDTO.Email);
 
-    if (user != null)
+
+    if (hasUser)
     {
-        return Results.Ok(user);
+        return Results.Ok(await db.Users.FirstAsync(user => user.Email == userDTO.Email));
     }
     else
     {
-
         var newUser =
         new User
         {
@@ -94,7 +94,7 @@ contestItems.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
 
 contestItems.MapPost("/", async (ContestDTO contest, UniversalLeaderboardDb db) =>
 {
-    var user = await db.Users.FindAsync(contest.AdminEmail);
+    var user = await db.Users.FindAsync(new Guid(contest.AdminId));
 
     if (user != null)
     {
