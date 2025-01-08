@@ -13,6 +13,7 @@
     "@astrojs/tailwind": "^5.1.4",
     "@astrojs/vue": "^5.0.4",
     "@auth/core": "^0.37.3",
+    "@tanstack/vue-table": "^8.20.5",
     "astro": "^5.1.1",
     "auth-astro": "^4.2.0",
     "cookie": "^1.0.2",

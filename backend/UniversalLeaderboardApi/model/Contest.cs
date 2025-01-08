@@ -24,7 +24,8 @@ public class Contest
 
     public ICollection<Guid> Contestants { get; set; } = [];
 
-    [NotMapped]
+    public ICollection<ScoreEntry<int>> DisplayedScores { get; set; } = [];
+
     public ICollection<ScoreEntry<int>> ScoreEntries { get; set; } = [];
 
 }

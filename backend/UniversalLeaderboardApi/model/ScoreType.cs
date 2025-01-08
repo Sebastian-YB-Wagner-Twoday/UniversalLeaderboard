@@ -1,5 +1,6 @@
 
-public enum ScoreType {
+public enum ScoreType
+{
     Integer,
     Float
 }

@@ -8,6 +8,8 @@ public class ScoreEntry<T>
 
     public required T score { get; set; }
 
+    public required DateTime date { get; set; }
+
 }
 
 
