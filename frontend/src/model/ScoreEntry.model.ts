@@ -1,4 +1,9 @@
-export interface ScoreEntry<T> {
-  UserId: string;
-  score: T;
+export interface ScoreEntry {
+  id: string;
+  userId: string;
+  contestId: string;
+  userName: string;
+  score: number;
+  relatedScoreEntries: string[];
+  date: Date;
 }

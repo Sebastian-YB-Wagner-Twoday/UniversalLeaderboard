@@ -40,16 +40,45 @@ users.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
 * get list of all contests related to user
 */
 users.MapGet("/{id}/contests/{pagination}", async (string id, int pagination, UniversalLeaderboardDb db) =>
-    await db.Users.FindAsync(new Guid(id))
-        is User user
-            ? Results.Ok(
-                db.Contests
-                .Where(contest => user.contestIds.Contains(contest.Id))
-                .OrderBy(contest => contest.CreatedDate)
-                .Skip(pagination * 10)
-                .Take(10)
-                .ToList())
-            : Results.NotFound());
+{
+    var user = await db.Users.FindAsync(new Guid(id));
+
+    var contests = db.Contests
+                        .Where(contest => user.contestIds.Contains(contest.Id))
+                        .OrderBy(contest => contest.CreatedDate)
+                        .Skip(pagination * 10)
+                        .Take(10)
+                        .ToList();
+    if (user != null)
+    {
+        ICollection<ContestResponseModel> returnContests = [];
+        foreach (var contest in contests)
+        {
+
+            var displayedScores = db.ScoreEntries.Where(entry => contest.DisplayedScores.Contains(entry.Id)).ToList();
+
+            returnContests.Add(new ContestResponseModel()
+            {
+                Name = contest.Name,
+                Id = contest.Id,
+                CreatedDate = contest.CreatedDate,
+                Description = contest.Description,
+                RankingType = contest.RankingType,
+                RankingOrder = contest.RankingOrder,
+                ScoreType = contest.ScoreType,
+                DisplayedScores = displayedScores
+
+            });
+        };
+
+        return Results.Ok(returnContests);
+    }
+    else
+    {
+        return Results.NotFound();
+    }
+
+});
 
 
 users.MapPost("/", async (UserDTO userDTO, UniversalLeaderboardDb db) =>
@@ -85,14 +114,109 @@ contestItems.MapGet("/", async (UniversalLeaderboardDb db) =>
     await db.Contests.ToListAsync());
 
 contestItems.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
+{
+    var contest = await db.Contests.FindAsync(new Guid(id));
 
-    await db.Contests.FindAsync(new Guid(id))
-        is Contest contest
-            ? Results.Ok(contest)
-            : Results.NotFound());
+    if (contest != null)
+    {
+        var displayedScores = db.ScoreEntries.Where(entry => contest.DisplayedScores.Contains(entry.Id)).ToList();
+
+        return Results.Ok(new ContestResponseModel()
+        {
+            Name = contest.Name,
+            Id = contest.Id,
+            CreatedDate = contest.CreatedDate,
+            Description = contest.Description,
+            RankingType = contest.RankingType,
+            RankingOrder = contest.RankingOrder,
+            DisplayedScores = displayedScores
+        });
+    }
+    else
+    {
+        return Results.NotFound();
+    }
+});
+
+contestItems.MapPost("/submitScore", async (ScoreEntryDTO scoreEntryDTO, UniversalLeaderboardDb db) =>
+    {
+        var contest = await db.Contests.FindAsync(new Guid(scoreEntryDTO.ContestId));
+        var user = await db.Users.FindAsync(new Guid(scoreEntryDTO.UserId));
+
+        if (contest != null && user != null)
+        {
+            var scoreEntry = new ScoreEntry()
+            {
+                ContestId = new Guid(scoreEntryDTO.ContestId),
+                UserId = new Guid(scoreEntryDTO.UserId),
+                UserName = user.UserName,
+                Score = scoreEntryDTO.Score,
+                Date = new DateTime()
+            };
 
 
-contestItems.MapPost("/", async (ContestDTO contest, UniversalLeaderboardDb db) =>
+            db.ScoreEntries.Add(scoreEntry);
+            contest.ScoreEntries.Add(scoreEntry.Id);
+
+            var displayedScore = await db.ScoreEntries
+                .Where(entry => contest.DisplayedScores.Contains(entry.Id))
+                .Where(entry => entry.UserId == user.Id).SingleOrDefaultAsync();
+
+            if (displayedScore != null)
+            {
+
+                switch (contest.RankingType)
+                {
+                    case RankingType.HighScore:
+                        if (contest.RankingOrder == RankingOrder.Descending)
+                        {
+                            if (displayedScore.Score > scoreEntryDTO.Score)
+                            {
+                                contest.DisplayedScores.Remove(displayedScore.Id);
+                                contest.DisplayedScores.Add(scoreEntry.Id);
+                            }
+                        }
+
+                        if (contest.RankingOrder == RankingOrder.Ascending)
+                        {
+                            if (displayedScore.Score < scoreEntryDTO.Score)
+                            {
+                                contest.DisplayedScores.Remove(displayedScore.Id);
+                                contest.DisplayedScores.Add(scoreEntry.Id);
+                            }
+                        }
+                        break;
+
+                    case RankingType.Incremental:
+                        displayedScore.Score += scoreEntry.Score;
+                        displayedScore.RelatedScoreEntries.Add(scoreEntry.Id);
+                        break;
+
+                    case RankingType.Decremental:
+                        displayedScore.Score += scoreEntry.Score;
+                        displayedScore.RelatedScoreEntries.Add(scoreEntry.Id);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                contest.DisplayedScores.Add(scoreEntry.Id);
+            }
+
+            await db.SaveChangesAsync();
+
+            return Results.Ok();
+        }
+
+        return Results.NotFound();
+
+    }
+);
+
+contestItems.MapPost("/", async (ContestCreateRequestModel contest, UniversalLeaderboardDb db) =>
 {
     var user = await db.Users.FindAsync(new Guid(contest.AdminId));
 
@@ -107,6 +231,7 @@ contestItems.MapPost("/", async (ContestDTO contest, UniversalLeaderboardDb db) 
             Description = contest.Description,
             RankingOrder = (RankingOrder)contest.RankingOrder,
             RankingType = (RankingType)contest.RankingType,
+            ScoreType = (ScoreType)contest.ScoreType,
             Active = false,
             CreatedDate = new DateTime()
         };
