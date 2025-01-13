@@ -13,7 +13,6 @@ const responseMessage = ref<string>();
 async function submit(e: Event) {
   e.preventDefault();
   const formData = new FormData(e.currentTarget as HTMLFormElement);
-  console.log("contest: ", props.contest);
 
   const response = await fetch("/api/createScore", {
     method: "POST",
@@ -29,7 +28,7 @@ async function submit(e: Event) {
 </script>
 
 <template>
-  <form @submit="submit">
+  <form @submit="submit" class="flex flex-row">
     <label>
       Score
       <Input id="score" type="text" name="score" placeholder="new score" />

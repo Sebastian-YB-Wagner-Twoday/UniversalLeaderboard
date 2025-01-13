@@ -1,0 +1,22 @@
+---
+import type { Contest } from "@/model/Contest.model";
+import LeaderBoardTable from "./LeaderBoardTable.vue";
+
+interface Props {
+  contestId: string;
+}
+
+const { contestId } = Astro.props;
+
+const contest: Contest = await fetch(
+  `http://localhost:5212/contest/${contestId}`,
+  {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  }
+).then((response) =>
+  response.json().catch((e) => console.log("there was an error: ", e))
+);
+---
+
+<LeaderBoardTable contest={contest} client:only />

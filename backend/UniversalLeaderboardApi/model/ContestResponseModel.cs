@@ -21,6 +21,4 @@ public class ContestResponseModel
 
     public ICollection<Guid> Contestants { get; set; } = [];
 
-    public ICollection<ScoreEntry> DisplayedScores { get; set; } = [];
-
 }

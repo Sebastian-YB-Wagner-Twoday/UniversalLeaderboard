@@ -4,8 +4,7 @@ import { Auth } from "auth-astro/components";
 import CreateContestForm from "./CreateContestForm.vue";
 import { getSession } from "auth-astro/server";
 import type { Contest } from "../model/Contest.model";
-import LeaderBoard from "./Leaderboard/LeaderBoard.vue";
-import { columns } from "./Leaderboard/columns";
+import LeaderBoard from "./Leaderboard/LeaderBoard.astro";
 import ScoreForm from "./Leaderboard/ScoreForm.vue";
 
 const session = await getSession(Astro.request);
@@ -14,19 +13,12 @@ const id = session?.user?.id;
 let contests: Contest[]
 
 if(id){
-  const pagination = "0";
+  const pagination = 0;
 
-const url = "http://localhost:5212/users/" + id + "/contests/" + pagination;
-
-const response = await fetch(url, {
-  method: "GET",
-  headers: { "Content-Type": "application/json" },
-});
-
- contests = await response
-  .json()
-  .catch((e) => console.log("there was an error: ", e));
-
+  contests = await fetch(`http://localhost:5212/users/${id}/contests/${pagination}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  }).then((response) => response.json().catch((e) => console.log("there was an error: ", e)))
 }
 
 ---
@@ -48,7 +40,7 @@ const response = await fetch(url, {
               {session ? contests.map((contest) =>
               <div>
                 <ScoreForm contest={contest} client:load />
-                <LeaderBoard columns={columns(contest.scoreType)} contest={contest} />
+                <LeaderBoard contestId={contest.id} />
               </div>
               ):""}
           </div> 

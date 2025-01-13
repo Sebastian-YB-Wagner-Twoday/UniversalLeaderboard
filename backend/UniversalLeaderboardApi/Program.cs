@@ -55,7 +55,6 @@ users.MapGet("/{id}/contests/{pagination}", async (string id, int pagination, Un
         foreach (var contest in contests)
         {
 
-            var displayedScores = db.ScoreEntries.Where(entry => contest.DisplayedScores.Contains(entry.Id)).ToList();
 
             returnContests.Add(new ContestResponseModel()
             {
@@ -66,8 +65,6 @@ users.MapGet("/{id}/contests/{pagination}", async (string id, int pagination, Un
                 RankingType = contest.RankingType,
                 RankingOrder = contest.RankingOrder,
                 ScoreType = contest.ScoreType,
-                DisplayedScores = displayedScores
-
             });
         };
 
@@ -110,8 +107,10 @@ users.MapPost("/", async (UserDTO userDTO, UniversalLeaderboardDb db) =>
 
 var contestItems = app.MapGroup("/contest");
 
+//TODO: Delete
 contestItems.MapGet("/", async (UniversalLeaderboardDb db) =>
     await db.Contests.ToListAsync());
+
 
 contestItems.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
 {
@@ -119,8 +118,6 @@ contestItems.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
 
     if (contest != null)
     {
-        var displayedScores = db.ScoreEntries.Where(entry => contest.DisplayedScores.Contains(entry.Id)).ToList();
-
         return Results.Ok(new ContestResponseModel()
         {
             Name = contest.Name,
@@ -129,8 +126,44 @@ contestItems.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
             Description = contest.Description,
             RankingType = contest.RankingType,
             RankingOrder = contest.RankingOrder,
-            DisplayedScores = displayedScores
+            ScoreType = contest.ScoreType
         });
+    }
+    else
+    {
+        return Results.NotFound();
+    }
+});
+
+contestItems.MapGet("/{id}/scores", async (string id, UniversalLeaderboardDb db) =>
+{
+    var contest = await db.Contests.FindAsync(new Guid(id));
+
+    if (contest != null)
+    {
+        var displayedScores = db.ScoreEntries.Where(entry => contest.DisplayedScores.Contains(entry.Id));
+        if (!displayedScores.Any())
+        {
+            return Results.Ok();
+        }
+
+        if (contest.RankingOrder == RankingOrder.Ascending)
+        {
+            return Results.Ok(
+                displayedScores
+                    .OrderBy(contest => contest.Score)
+                    .ToList()
+            );
+        }
+        else
+        {
+            return Results.Ok(
+                displayedScores
+                    .OrderBy(contest => -contest.Score)
+                    .ToList()
+            );
+        }
+
     }
     else
     {

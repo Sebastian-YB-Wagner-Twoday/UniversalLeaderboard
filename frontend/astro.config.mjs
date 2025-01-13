@@ -13,7 +13,7 @@ import tailwind from "@astrojs/tailwind";
 export default defineConfig({
   integrations: [
     auth(),
-    vue(),
+    vue({ appEntrypoint: "/src/pages/_app" }),
     tailwind({
       applyBaseStyles: false,
     }),

@@ -18,7 +18,7 @@ async function submit(e: Event) {
 </script>
 
 <template>
-  <form @submit="submit">
+  <form @submit="submit" class="flex flex-row m-5">
     <label>
       Name
       <Input type="text" id="name" name="name" required />

@@ -10,26 +10,44 @@ import {
 } from "@/components/ui/table";
 import type { Contest } from "@/model/Contest.model";
 import type { ScoreEntry } from "@/model/ScoreEntry.model";
+import { FlexRender, getCoreRowModel, useVueTable } from "@tanstack/vue-table";
 
-import {
-  FlexRender,
-  getCoreRowModel,
-  useVueTable,
-  type ColumnDef,
-} from "@tanstack/vue-table";
+import { useQuery } from "@tanstack/vue-query";
 
 const props = defineProps<{
-  columns: ColumnDef<ScoreEntry, TValue>[];
   contest: Contest;
 }>();
 
+const fetchScores = async (): Promise<ScoreEntry[]> => {
+  const response = await fetch(`/leaderboard/${props.contest.id}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new Error("there was an error");
+  }
+
+  return await response.json();
+};
+
+const { isPending, isError, data, error } = useQuery({
+  queryKey: ["scores"],
+  queryFn: fetchScores,
+});
+
+const fallbackData: ScoreEntry[] = [];
+
+const shownColumns = columns(props.contest.scoreType);
+
 const table = useVueTable({
   get data() {
-    return props.contest.displayedScores;
+    return data.value ?? fallbackData;
   },
   get columns() {
-    return props.columns;
+    return shownColumns;
   },
+
   getCoreRowModel: getCoreRowModel(),
 });
 </script>
@@ -51,7 +69,9 @@ const table = useVueTable({
           </TableHead>
         </TableRow>
       </TableHeader>
-      <TableBody>
+      <span v-if="isPending">Loading...</span>
+      <span v-else-if="isError">Error: {{ error?.message }}</span>
+      <TableBody v-else>
         <template v-if="table.getRowModel().rows?.length">
           <TableRow
             v-for="row in table.getRowModel().rows"
