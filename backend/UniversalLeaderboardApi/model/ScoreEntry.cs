@@ -7,7 +7,7 @@ public class ScoreEntry
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
 
-    public required Guid UserId { get; set; }
+    public required string UserId { get; set; }
 
     public required Guid ContestId { get; set; }
 

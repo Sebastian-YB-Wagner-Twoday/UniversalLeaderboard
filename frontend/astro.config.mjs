@@ -3,8 +3,6 @@ import { defineConfig } from "astro/config";
 
 import vue from "@astrojs/vue";
 
-import auth from "auth-astro";
-
 import node from "@astrojs/node";
 
 import tailwind from "@astrojs/tailwind";
@@ -12,7 +10,6 @@ import tailwind from "@astrojs/tailwind";
 // https://astro.build/config
 export default defineConfig({
   integrations: [
-    auth(),
     vue({ appEntrypoint: "/src/pages/_app" }),
     tailwind({
       applyBaseStyles: false,

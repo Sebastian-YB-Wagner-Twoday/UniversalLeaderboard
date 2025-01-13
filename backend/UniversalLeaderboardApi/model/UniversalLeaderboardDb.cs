@@ -7,8 +7,6 @@ class UniversalLeaderboardDb : DbContext
 
     public DbSet<Contest> Contests => Set<Contest>();
 
-    public DbSet<User> Users => Set<User>();
-
     public DbSet<ScoreEntry> ScoreEntries => Set<ScoreEntry>();
 
 

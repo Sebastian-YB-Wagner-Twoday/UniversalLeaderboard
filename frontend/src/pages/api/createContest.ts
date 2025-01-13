@@ -1,9 +1,6 @@
 import type { APIRoute } from "astro";
-import { getSession } from "auth-astro/server";
 
 export const POST: APIRoute = async ({ request }) => {
-  const session = await getSession(request);
-
   const data = await request.formData();
   const name = data.get("name");
   const description = data.get("description");
@@ -24,7 +21,6 @@ export const POST: APIRoute = async ({ request }) => {
   const body = JSON.stringify({
     name: name,
     description: description,
-    AdminId: session?.user?.id,
     rankingType: rankingType,
     rankingOrder: rankingOrder,
     scoreType: scoreType,
