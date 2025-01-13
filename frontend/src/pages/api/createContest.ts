@@ -9,8 +9,10 @@ export const POST: APIRoute = async ({ request }) => {
   const description = data.get("description");
   const rankingType = data.get("rankingType");
   const rankingOrder = data.get("rankingOrder");
+  const scoreType = data.get("scoreType");
+
   // Validate the data - you'll probably want to do more than this
-  if (!name || !description || !rankingType || !rankingOrder) {
+  if (!name || !description || !rankingType || !rankingOrder || !scoreType) {
     return new Response(
       JSON.stringify({
         message: "Missing required fields",
@@ -25,6 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
     AdminId: session?.user?.id,
     rankingType: rankingType,
     rankingOrder: rankingOrder,
+    scoreType: scoreType,
   });
 
   const response = await fetch("http://localhost:5212/contest", {

@@ -9,6 +9,7 @@ class UniversalLeaderboardDb : DbContext
 
     public DbSet<User> Users => Set<User>();
 
+    public DbSet<ScoreEntry> ScoreEntries => Set<ScoreEntry>();
 
 
 }

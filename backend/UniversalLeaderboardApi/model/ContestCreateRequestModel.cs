@@ -1,5 +1,5 @@
 
-public class ContestDTO
+public class ContestCreateRequestModel
 {
 
     public required string Name { get; set; }
@@ -11,6 +11,8 @@ public class ContestDTO
     public int RankingType { get; set; }
 
     public int RankingOrder { get; set; }
+
+    public int ScoreType { get; set; }
 
 }
 

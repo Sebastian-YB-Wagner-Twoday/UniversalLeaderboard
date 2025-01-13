@@ -1,13 +1,7 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-
-public class Contest
+public class ContestResponseModel
 {
-
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     public required string Name { get; set; }
 
@@ -27,10 +21,4 @@ public class Contest
 
     public ICollection<Guid> Contestants { get; set; } = [];
 
-    public ICollection<Guid> DisplayedScores { get; set; } = [];
-
-    public ICollection<Guid> ScoreEntries { get; set; } = [];
-
 }
-
-

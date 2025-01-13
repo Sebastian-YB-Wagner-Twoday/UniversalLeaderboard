@@ -1,9 +1,10 @@
 import type { RankingOrder } from "./RankingOrder.model";
 import type { RankingType } from "./RankingType.model";
 import type { ScoreEntry } from "./ScoreEntry.model";
+import type { ScoreType } from "./ScoreType.model";
 
 export interface Contest {
-  Id: string;
+  id: string;
   name: string;
   admin: string[];
   createdDate: Date;
@@ -11,6 +12,7 @@ export interface Contest {
   active: boolean;
   rankingType: RankingType;
   rankingOrder: RankingOrder;
-  Contestants: string[];
-  ScoreEntries: ScoreEntry<number>[];
+  contestants: string[];
+  scoreType: ScoreType;
+  displayedScores: ScoreEntry[];
 }

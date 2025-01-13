@@ -11,7 +11,13 @@ import tailwind from "@astrojs/tailwind";
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [auth(), vue(), tailwind()],
+  integrations: [
+    auth(),
+    vue({ appEntrypoint: "/src/pages/_app" }),
+    tailwind({
+      applyBaseStyles: false,
+    }),
+  ],
 
   adapter: node({
     mode: "standalone",

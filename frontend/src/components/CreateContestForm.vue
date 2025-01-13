@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 const responseMessage = ref<string>();
 
@@ -16,10 +18,10 @@ async function submit(e: Event) {
 </script>
 
 <template>
-  <form @submit="submit">
+  <form @submit="submit" class="flex flex-row m-5">
     <label>
       Name
-      <input type="text" id="name" name="name" required />
+      <Input type="text" id="name" name="name" required />
     </label>
     <label>
       description
@@ -45,7 +47,14 @@ async function submit(e: Event) {
         <option value="1">Descending</option>
       </select>
     </label>
-    <button>Send</button>
+    <label>
+      ScoreType
+      <select id="scoreType" name="scoreType" required>
+        <option value="0">Integer</option>
+        <option value="1">Float</option>
+      </select>
+    </label>
+    <Button>Send</Button>
     <p v-if="responseMessage">{{ responseMessage }}</p>
   </form>
 </template>
