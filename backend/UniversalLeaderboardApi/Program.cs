@@ -35,13 +35,15 @@ if (app.Environment.IsDevelopment())
 app.MapIdentityApi<LeaderBoardUser>();
 
 
-app.MapPost("/registerUsername", async (string userName, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
+app.MapPost("/registerUsername", async (string userName, ApplicationDbContext appdb, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
 {
-    var user = await userManager.GetUserAsync(principal);
+    var loggedInUser = await userManager.GetUserAsync(principal);
+    var user = await appdb.Users.FindAsync(loggedInUser?.Id);
 
     if (user is not null)
     {
-        await userManager.SetUserNameAsync(user, userName);
+        user.UserName = userName;
+        await appdb.SaveChangesAsync();
         return Results.Ok();
     }
     return Results.NotFound();
@@ -74,7 +76,7 @@ user.MapGet("", async (ApplicationDbContext appdb, UserManager<LeaderBoardUser> 
 /**
 * get list of all contests related to user
 */
-user.MapGet("/contests/{pagination}", async (string id, int pagination, UniversalLeaderboardDb db, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
+user.MapGet("/contests/{pagination}", async (int pagination, UniversalLeaderboardDb db, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
 {
     var user = await userManager.GetUserAsync(principal);
 
@@ -112,7 +114,7 @@ user.MapGet("/contests/{pagination}", async (string id, int pagination, Universa
         return Results.NotFound();
     }
 
-});
+}).RequireAuthorization();
 
 
 var contestItems = app.MapGroup("/contest");
@@ -154,7 +156,7 @@ contestItems.MapGet("/{id}/scores", async (string id, UniversalLeaderboardDb db)
         var displayedScores = db.ScoreEntries.Where(entry => contest.DisplayedScores.Contains(entry.Id));
         if (!displayedScores.Any())
         {
-            return Results.Ok();
+            return Results.Ok(displayedScores.ToList());
         }
 
         if (contest.RankingOrder == RankingOrder.Ascending)
@@ -251,7 +253,7 @@ contestItems.MapPost("/submitScore", async (ScoreEntryDTO scoreEntryDTO, Univers
 
             await db.SaveChangesAsync();
 
-            return Results.Ok();
+            return Results.Ok(scoreEntry);
         }
 
         return Results.NotFound();
@@ -259,14 +261,13 @@ contestItems.MapPost("/submitScore", async (ScoreEntryDTO scoreEntryDTO, Univers
     }
 ).RequireAuthorization();
 
-contestItems.MapPost("/", async (ContestCreateRequestModel contest, UniversalLeaderboardDb db, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
+contestItems.MapPost("/", async (ContestCreateRequestModel contest, UniversalLeaderboardDb db, ApplicationDbContext appdb, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
 {
-    var user = await userManager.GetUserAsync(principal);
+    var loggedInUser = await userManager.GetUserAsync(principal);
+    var user = await appdb.Users.FindAsync(loggedInUser?.Id);
 
     if (user != null)
     {
-        Console.WriteLine(contest);
-
 
         var newContest = new Contest
         {
@@ -286,6 +287,8 @@ contestItems.MapPost("/", async (ContestCreateRequestModel contest, UniversalLea
         user.contestIds.Add(newContest.Id);
 
         await db.SaveChangesAsync();
+        await appdb.SaveChangesAsync();
+
 
         return Results.Created($"/{newContest.Id}", newContest);
     }

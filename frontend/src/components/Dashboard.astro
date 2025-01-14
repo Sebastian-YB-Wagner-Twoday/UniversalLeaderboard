@@ -1,53 +1,37 @@
 ---
-import type { Session } from "@auth/core/types";
-import { Auth } from "auth-astro/components";
 import CreateContestForm from "./CreateContestForm.vue";
-import { getSession } from "auth-astro/server";
 import type { Contest } from "../model/Contest.model";
 import LeaderBoard from "./Leaderboard/LeaderBoard.astro";
-import ScoreForm from "./Leaderboard/ScoreForm.vue";
 
-const session = await getSession(Astro.request);
+let contests: Contest[];
 
-const id = session?.user?.id;
-let contests: Contest[]
+const pagination = 0;
 
-if(id){
-  const pagination = 0;
+const data = await fetch(`http://localhost:5212/users/contests/${pagination}`, {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: "Bearer " + Astro.cookies.get("session")?.value || "",
+  },
+});
 
-  contests = await fetch(`http://localhost:5212/users/${id}/contests/${pagination}`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  }).then((response) => response.json().catch((e) => console.log("there was an error: ", e)))
-}
-
+contests = await data
+  .json()
+  .catch((e) => console.log("couldn't fetch list: ", e));
 ---
 
 <div>
   <CreateContestForm client:load />
 
-  <Auth
-    ><div>
-      {
-        (session: Session) => (
-        <p class="text-2xl">
-        {session
-            ? `Welcome ${session.user?.name}, here are your leaderboards:`
-            : "Not logged in"}
-        </p> 
-        
-          <div>
-              {session ? contests.map((contest) =>
-              <div>
-                <ScoreForm contest={contest} client:load />
-                <LeaderBoard contestId={contest.id} />
-              </div>
-              ):""}
-          </div> 
-        
-        )
-      }
-
-    </div>
-  </Auth>
+  <div>
+    {
+      contests
+        ? contests.map((contest) => (
+            <div>
+              <LeaderBoard contestId={contest.id} />
+            </div>
+          ))
+        : ""
+    }
+  </div>
 </div>

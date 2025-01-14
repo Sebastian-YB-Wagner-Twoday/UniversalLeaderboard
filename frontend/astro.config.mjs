@@ -15,7 +15,6 @@ export default defineConfig({
       applyBaseStyles: false,
     }),
   ],
-
   adapter: node({
     mode: "standalone",
   }),

@@ -1,10 +1,45 @@
 ---
-import type { Session } from "@auth/core/types";
 import Layout from "../layouts/Layout.astro";
-import { Auth, SignIn, SignOut } from "auth-astro/components";
 import Dashboard from "../components/Dashboard.astro";
 import background from "../assets/background.svg";
 import "@/styles/globals.css";
+
+const login = await fetch(
+  "http://localhost:5212/login?useCookies=false&useSessionCookies=false",
+  {
+    method: "POST",
+    body: JSON.stringify({
+      email: "seb@gmail.com",
+      password: "Dsadsa-1",
+    }),
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  }
+);
+
+const sessionData = await login
+  .json()
+  .catch((e) => console.log("Couldn't login: ", e));
+
+Astro.locals.session = sessionData;
+const today = new Date();
+today.setMinutes(today.getHours() + (sessionData.expiresIn ?? 0));
+
+Astro.cookies.set("session", sessionData.accessToken ?? "", {
+  httpOnly: true,
+  sameSite: "lax",
+  secure: import.meta.env.PROD,
+  expires: today,
+  path: "/",
+});
+
+Astro.cookies.set("refresh", sessionData.refreshToken ?? "", {
+  httpOnly: true,
+  sameSite: "lax",
+  secure: import.meta.env.PROD,
+  expires: today,
+  path: "/",
+});
 ---
 
 <Layout>
@@ -15,27 +50,6 @@ import "@/styles/globals.css";
     fetchpriority="high"
   />
   <main>
-    <Auth>
-      {
-        (session: Session) => {
-          return (
-            <>
-              {session ? (
-                <SignOut>Logout</SignOut>
-              ) : (
-                <SignIn provider="github">Login</SignIn>
-              )}
-              <p>
-                {session
-                  ? `Logged in as ${session.user?.name}`
-                  : "Not logged in"}
-              </p>
-            </>
-          );
-        }
-      }
-    </Auth>
-
     <Dashboard />
   </main>
 </Layout>

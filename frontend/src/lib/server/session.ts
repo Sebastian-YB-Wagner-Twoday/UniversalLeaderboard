@@ -1,10 +1,21 @@
 import type { APIContext } from "astro";
 
-export async function validateSessionToken(token: string): Promise<any> {
-  return await fetch("http://localhost:5212/manage/info", {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
+export async function validateSessionToken(
+  token: string,
+  refreshToken: string
+): Promise<any> {
+  const session = await fetch("http://localhost:5212/refresh", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: token,
+    },
+    body: JSON.stringify({
+      refreshToken,
+    }),
   });
+
+  return session.json().catch((e) => "");
 }
 
 export function setSessionTokenCookie(
