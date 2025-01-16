@@ -7,6 +7,7 @@ import type { ScoreEntry } from "@/model/ScoreEntry.model";
 import type { LeaderBoardUser } from "@/model/LeaderBoardUser.model";
 import { RankingType } from "@/model/RankingType.model";
 import { RankingOrder } from "@/model/RankingOrder.model";
+import { post } from "@/lib/api/http";
 
 const props = defineProps<{
   contestId: string;
@@ -20,12 +21,9 @@ const queryClient = useQueryClient();
 const responseMessage = ref<string>();
 
 async function postScore(variables: ScoreEntry) {
-  const response = await fetch("/api/createScore", {
-    method: "POST",
-    body: JSON.stringify({
-      score: variables.score,
-      contestId: variables.contestId,
-    }),
+  const response = await post("/api/createScore", {
+    score: variables.score,
+    contestId: variables.contestId,
   });
 
   const data = await response.json();

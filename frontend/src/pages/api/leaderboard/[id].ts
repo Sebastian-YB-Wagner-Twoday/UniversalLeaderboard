@@ -1,3 +1,4 @@
+import { get } from "@/lib/api/http";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ params }) => {
@@ -13,12 +14,8 @@ export const GET: APIRoute = async ({ params }) => {
     );
   }
 
-  const response = await fetch(
-    `http://localhost:5212/contest/${contestId}/scores`,
-    {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    }
+  const response = await get(
+    `http://localhost:5212/contest/${contestId}/scores`
   );
 
   return response;

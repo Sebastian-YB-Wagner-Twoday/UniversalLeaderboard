@@ -15,6 +15,7 @@ import { FlexRender, getCoreRowModel, useVueTable } from "@tanstack/vue-table";
 import ScoreForm from "./ScoreForm.vue";
 
 import { useQuery } from "@tanstack/vue-query";
+import { get } from "@/lib/api/http";
 
 const props = defineProps<{
   contest: Contest;
@@ -22,10 +23,7 @@ const props = defineProps<{
 }>();
 
 const fetchScores = async (): Promise<ScoreEntry[]> => {
-  const response = await fetch(`/leaderboard/${props.contest.id}`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
+  const response = await get(`api/leaderboard/${props.contest.id}`);
 
   if (!response.ok) {
     throw new Error("there was an error");
@@ -58,7 +56,6 @@ const table = useVueTable({
 <template>
   <div class="border rounded-md">
     <ScoreForm
-      :v-if="user !== null"
       :user="user"
       :contestId="contest.id"
       :rankingType="contest.rankingType"

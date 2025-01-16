@@ -2,6 +2,7 @@
 import type { Contest } from "@/model/Contest.model";
 import LeaderBoardTable from "./LeaderBoardTable.vue";
 import { user } from "@/lib/store/userStore";
+import { get } from "@/lib/api/http";
 
 interface Props {
   contestId: string;
@@ -9,12 +10,8 @@ interface Props {
 
 const { contestId } = Astro.props;
 
-const contest: Contest = await fetch(
-  `http://localhost:5212/contest/${contestId}`,
-  {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  }
+const contest: Contest = await get(
+  `http://localhost:5212/contest/${contestId}`
 ).then((response) =>
   response.json().catch((e) => console.log("there was an error: ", e))
 );

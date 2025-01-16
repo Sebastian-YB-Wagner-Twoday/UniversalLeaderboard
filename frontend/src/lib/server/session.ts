@@ -1,20 +1,16 @@
 import type { LeaderBoardUser } from "@/model/LeaderBoardUser.model";
 import type { APIContext } from "astro";
+import { get, post } from "../api/http";
 
 export async function validateSessionToken(
   token: string,
   refreshToken: string
 ): Promise<any> {
-  const session = await fetch("http://localhost:5212/refresh", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token || "",
-    },
-    body: JSON.stringify({
-      refreshToken,
-    }),
-  });
+  const session = await post(
+    "http://localhost:5212/refresh",
+    { refreshToken },
+    token
+  );
 
   return session
     .json()
@@ -22,13 +18,7 @@ export async function validateSessionToken(
 }
 
 export async function getLoggedInUser(token: string): Promise<LeaderBoardUser> {
-  const user = await fetch("http://localhost:5212/user", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token || "",
-    },
-  });
+  const user = await get("http://localhost:5212/user", token);
 
   return user.json().catch((e) => console.log("User info can't be found: ", e));
 }

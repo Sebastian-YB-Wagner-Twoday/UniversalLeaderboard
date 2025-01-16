@@ -2,16 +2,15 @@
 import { ref } from "vue";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { postForm } from "@/lib/api/http";
 
 const responseMessage = ref<string>();
 
 async function submit(e: Event) {
   e.preventDefault();
   const formData = new FormData(e.currentTarget as HTMLFormElement);
-  const response = await fetch("/api/createContest", {
-    method: "POST",
-    body: formData,
-  });
+  const response = await postForm("/api/createContest", formData);
+
   const data = await response.json();
   responseMessage.value = data.message;
 }

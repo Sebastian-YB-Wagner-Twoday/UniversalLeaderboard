@@ -1,3 +1,4 @@
+import { post } from "@/lib/api/http";
 import type { APIRoute } from "astro";
 
 export const POST: APIRoute = async ({ cookies, request }) => {
@@ -15,19 +16,16 @@ export const POST: APIRoute = async ({ cookies, request }) => {
     );
   }
 
-  const body = JSON.stringify({
+  const body = {
     score: score,
     contestId: contestId,
-  });
+  };
 
-  const response = await fetch("http://localhost:5212/contest/submitScore", {
-    method: "POST",
-    body: body,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.get("session")?.value || "",
-    },
-  });
+  const response = await post(
+    "http://localhost:5212/contest/submitScore",
+    body,
+    cookies.get("session")?.value
+  );
 
   return response;
 };
