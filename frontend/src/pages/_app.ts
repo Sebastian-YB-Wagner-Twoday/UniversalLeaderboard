@@ -1,6 +1,14 @@
-import type { App } from "vue";
-import { VueQueryPlugin } from "@tanstack/vue-query";
+import { reactive, type App } from "vue";
+import {
+  QueryClient,
+  VueQueryPlugin,
+  type VueQueryPluginOptions,
+} from "@tanstack/vue-query";
 
 export default (app: App) => {
-  app.use(VueQueryPlugin);
+  const myClient = new QueryClient();
+  const vueQueryPluginOptions: VueQueryPluginOptions = {
+    queryClient: myClient,
+  };
+  app.use(VueQueryPlugin, vueQueryPluginOptions);
 };

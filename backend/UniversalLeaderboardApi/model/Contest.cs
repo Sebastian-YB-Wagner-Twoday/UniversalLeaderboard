@@ -11,7 +11,7 @@ public class Contest
 
     public required string Name { get; set; }
 
-    public ICollection<Guid> Admin { get; set; } = [];
+    public ICollection<string> Admin { get; set; } = [];
 
     public DateTime CreatedDate { get; set; }
 

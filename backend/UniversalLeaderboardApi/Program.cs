@@ -1,7 +1,14 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<UniversalLeaderboardDb>(opt => opt.UseInMemoryDatabase("TodoList"));
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("AppDb"));
+builder.Services.AddDbContext<UniversalLeaderboardDb>(opt => opt.UseInMemoryDatabase("LeaderBoardDb"));
+builder.Services.AddAuthorization();
+
+builder.Services.AddIdentityApiEndpoints<LeaderBoardUser>().AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -25,32 +32,64 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-var users = app.MapGroup("/users");
+app.MapIdentityApi<LeaderBoardUser>();
 
-users.MapGet("/", async (UniversalLeaderboardDb db) =>
-    await db.Users.ToListAsync());
 
-users.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
-    await db.Users.FindAsync(new Guid(id))
-        is User user
+app.MapPost("/registerUsername", async (string userName, ApplicationDbContext appdb, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
+{
+    var loggedInUser = await userManager.GetUserAsync(principal);
+    var user = await appdb.Users.FindAsync(loggedInUser?.Id);
+
+    if (user is not null)
+    {
+        user.UserName = userName;
+        await appdb.SaveChangesAsync();
+        return Results.Ok();
+    }
+    return Results.NotFound();
+
+})
+.RequireAuthorization();
+
+// protection from cross-site request forgery (CSRF/XSRF) attacks with empty body
+// form can't post anything useful so the body is null, the JSON call can pass
+// an empty object {} but doesn't allow cross-site due to CORS.
+app.MapPost("/logout", async (SignInManager<LeaderBoardUser> signInManager, [FromBody] object empty) =>
+{
+    if (empty is not null)
+    {
+        await signInManager.SignOutAsync();
+        return Results.Ok();
+    }
+    return Results.NotFound();
+
+}).RequireAuthorization();
+
+var user = app.MapGroup("/user");
+
+user.MapGet("", async (UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
+    await userManager.GetUserAsync(principal)
+        is LeaderBoardUser user
             ? Results.Ok(user)
             : Results.NotFound());
 
 /**
 * get list of all contests related to user
 */
-users.MapGet("/{id}/contests/{pagination}", async (string id, int pagination, UniversalLeaderboardDb db) =>
+user.MapGet("/contests/{pagination}", async (int pagination, UniversalLeaderboardDb db, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
 {
-    var user = await db.Users.FindAsync(new Guid(id));
+    var user = await userManager.GetUserAsync(principal);
 
-    var contests = db.Contests
-                        .Where(contest => user.contestIds.Contains(contest.Id))
-                        .OrderBy(contest => contest.CreatedDate)
-                        .Skip(pagination * 10)
-                        .Take(10)
-                        .ToList();
+
     if (user != null)
     {
+        var contests = db.Contests
+                            .Where(contest => user.contestIds.Contains(contest.Id))
+                            .OrderBy(contest => contest.CreatedDate)
+                            .Skip(pagination * 10)
+                            .Take(10)
+                            .ToList();
+
         ICollection<ContestResponseModel> returnContests = [];
         foreach (var contest in contests)
         {
@@ -75,34 +114,7 @@ users.MapGet("/{id}/contests/{pagination}", async (string id, int pagination, Un
         return Results.NotFound();
     }
 
-});
-
-
-users.MapPost("/", async (UserDTO userDTO, UniversalLeaderboardDb db) =>
-{
-    var hasUser = await db.Users.AnyAsync(user => user.Email == userDTO.Email);
-
-
-    if (hasUser)
-    {
-        return Results.Ok(await db.Users.FirstAsync(user => user.Email == userDTO.Email));
-    }
-    else
-    {
-        var newUser =
-        new User
-        {
-            UserName = userDTO.UserName,
-            Email = userDTO.Email
-        };
-
-        db.Users.Add(newUser);
-        await db.SaveChangesAsync();
-        return Results.Created($"/{newUser.UserName}", newUser);
-    }
-
-});
-
+}).RequireAuthorization();
 
 
 var contestItems = app.MapGroup("/contest");
@@ -135,22 +147,39 @@ contestItems.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
     }
 });
 
-contestItems.MapGet("/{id}/scores", async (string id, UniversalLeaderboardDb db) =>
+contestItems.MapGet("/{id}/scores", async (string id, UniversalLeaderboardDb db, ApplicationDbContext appdb) =>
 {
     var contest = await db.Contests.FindAsync(new Guid(id));
 
     if (contest != null)
     {
         var displayedScores = db.ScoreEntries.Where(entry => contest.DisplayedScores.Contains(entry.Id));
+
         if (!displayedScores.Any())
         {
-            return Results.Ok();
+            return Results.Ok(displayedScores.ToList());
+        }
+
+        ICollection<ScoreEntryResponseModel> displayedScoresWithUserName = [];
+
+        foreach (var displayedScore in displayedScores)
+        {
+            var user = await appdb.Users.FindAsync(displayedScore.UserId);
+            displayedScoresWithUserName.Add(new ScoreEntryResponseModel()
+            {
+                Id = displayedScore.Id,
+                ContestId = displayedScore.ContestId,
+                UserId = displayedScore.UserId,
+                Score = displayedScore.Score,
+                Date = displayedScore.Date,
+                UserName = user?.UserName ?? "N/A"
+            });
         }
 
         if (contest.RankingOrder == RankingOrder.Ascending)
         {
             return Results.Ok(
-                displayedScores
+                displayedScoresWithUserName
                     .OrderBy(contest => contest.Score)
                     .ToList()
             );
@@ -158,7 +187,7 @@ contestItems.MapGet("/{id}/scores", async (string id, UniversalLeaderboardDb db)
         else
         {
             return Results.Ok(
-                displayedScores
+                displayedScoresWithUserName
                     .OrderBy(contest => -contest.Score)
                     .ToList()
             );
@@ -171,18 +200,17 @@ contestItems.MapGet("/{id}/scores", async (string id, UniversalLeaderboardDb db)
     }
 });
 
-contestItems.MapPost("/submitScore", async (ScoreEntryDTO scoreEntryDTO, UniversalLeaderboardDb db) =>
+contestItems.MapPost("/submitScore", async (ScoreEntryDTO scoreEntryDTO, UniversalLeaderboardDb db, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
     {
         var contest = await db.Contests.FindAsync(new Guid(scoreEntryDTO.ContestId));
-        var user = await db.Users.FindAsync(new Guid(scoreEntryDTO.UserId));
+        var user = await userManager.GetUserAsync(principal);
 
-        if (contest != null && user != null)
+        if (contest != null && user != null && user.UserName != null)
         {
             var scoreEntry = new ScoreEntry()
             {
                 ContestId = new Guid(scoreEntryDTO.ContestId),
-                UserId = new Guid(scoreEntryDTO.UserId),
-                UserName = user.UserName,
+                UserId = user.Id,
                 Score = scoreEntryDTO.Score,
                 Date = new DateTime()
             };
@@ -226,7 +254,7 @@ contestItems.MapPost("/submitScore", async (ScoreEntryDTO scoreEntryDTO, Univers
                         break;
 
                     case RankingType.Decremental:
-                        displayedScore.Score += scoreEntry.Score;
+                        displayedScore.Score -= scoreEntry.Score;
                         displayedScore.RelatedScoreEntries.Add(scoreEntry.Id);
                         break;
 
@@ -241,22 +269,31 @@ contestItems.MapPost("/submitScore", async (ScoreEntryDTO scoreEntryDTO, Univers
 
             await db.SaveChangesAsync();
 
-            return Results.Ok();
+            ScoreEntryResponseModel scoreEntryWithUserName = new()
+            {
+                Id = scoreEntry.Id,
+                ContestId = scoreEntry.ContestId,
+                UserId = scoreEntry.UserId,
+                Score = scoreEntry.Score,
+                Date = scoreEntry.Date,
+                UserName = user?.UserName ?? "N/A"
+            };
+
+            return Results.Ok(scoreEntryWithUserName);
         }
 
         return Results.NotFound();
 
     }
-);
+).RequireAuthorization();
 
-contestItems.MapPost("/", async (ContestCreateRequestModel contest, UniversalLeaderboardDb db) =>
+contestItems.MapPost("/", async (ContestCreateRequestModel contest, UniversalLeaderboardDb db, ApplicationDbContext appdb, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
 {
-    var user = await db.Users.FindAsync(new Guid(contest.AdminId));
+    var loggedInUser = await userManager.GetUserAsync(principal);
+    var user = await appdb.Users.FindAsync(loggedInUser?.Id);
 
     if (user != null)
     {
-        Console.WriteLine(contest);
-
 
         var newContest = new Contest
         {
@@ -276,6 +313,8 @@ contestItems.MapPost("/", async (ContestCreateRequestModel contest, UniversalLea
         user.contestIds.Add(newContest.Id);
 
         await db.SaveChangesAsync();
+        await appdb.SaveChangesAsync();
+
 
         return Results.Created($"/{newContest.Id}", newContest);
     }
@@ -284,7 +323,7 @@ contestItems.MapPost("/", async (ContestCreateRequestModel contest, UniversalLea
         return Results.NotFound();
     }
 
-});
+}).RequireAuthorization();
 
 
 contestItems.MapDelete("/{id}", async (string id, UniversalLeaderboardDb db) =>

@@ -1,9 +1,6 @@
 import type { APIRoute } from "astro";
-import { getSession } from "auth-astro/server";
 
-export const POST: APIRoute = async ({ request }) => {
-  const session = await getSession(request);
-
+export const POST: APIRoute = async ({ cookies, request }) => {
   const data = await request.json();
   const score = data.score;
   const contestId = data.contestId;
@@ -19,7 +16,6 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const body = JSON.stringify({
-    UserId: session?.user?.id,
     score: score,
     contestId: contestId,
   });
@@ -27,7 +23,10 @@ export const POST: APIRoute = async ({ request }) => {
   const response = await fetch("http://localhost:5212/contest/submitScore", {
     method: "POST",
     body: body,
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.get("session")?.value || "",
+    },
   });
 
   return response;
