@@ -4,20 +4,22 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQueryClient, useMutation } from "@tanstack/vue-query";
 import type { ScoreEntry } from "@/model/ScoreEntry.model";
+import type { LeaderBoardUser } from "@/model/LeaderBoardUser.model";
+import { RankingType } from "@/model/RankingType.model";
+import { RankingOrder } from "@/model/RankingOrder.model";
 
 const props = defineProps<{
   contestId: string;
+  rankingType: RankingType;
+  rankingOrder: RankingOrder;
+  user: LeaderBoardUser;
 }>();
 
 const queryClient = useQueryClient();
 
 const responseMessage = ref<string>();
 
-async function postScore(variables: {
-  score?: string | object;
-  contestId: string;
-  userName: string;
-}) {
+async function postScore(variables: ScoreEntry) {
   const response = await fetch("/api/createScore", {
     method: "POST",
     body: JSON.stringify({
@@ -36,26 +38,71 @@ async function submit(e: Event) {
 
   const score = formData.get("score")?.valueOf();
 
-  mutate({ score, contestId: props.contestId, userName: "you" });
+  const scoreEntry = {
+    id: "",
+    score: Number(score),
+    userId: props.user.id,
+    contestId: props.contestId,
+    userName: props.user.userName,
+    relatedScoreEntries: [],
+    date: new Date(),
+  };
+  mutate(scoreEntry);
 }
 
 const { isPending, isError, error, isSuccess, mutate } = useMutation({
   mutationFn: postScore,
   // When mutate is called:
-  onMutate: async (newScore) => {
+  onMutate: async (newScoreEntry) => {
     // Cancel any outgoing refetches
     // (so they don't overwrite our optimistic update)
     await queryClient.cancelQueries({ queryKey: ["scores"] });
 
     // Snapshot the previous value
-    const previousScores = queryClient.getQueryData(["scores"]);
+    const previousScores: ScoreEntry[] | undefined = queryClient.getQueryData([
+      "scores",
+    ]);
 
-    queryClient.setQueryData(["scores"], (old: ScoreEntry[]) => {
-      if (old) {
-        return [...old, newScore];
+    if (previousScores) {
+      const previousEntry = previousScores.find(
+        (scoreEntry) => scoreEntry.userId === newScoreEntry.userId
+      );
+
+      console.log(previousEntry);
+
+      if (previousEntry) {
+        const index = previousScores.indexOf(previousEntry);
+
+        if (props.rankingType === RankingType.HighScore) {
+          if (props.rankingOrder === RankingOrder.Ascending) {
+            if (previousEntry.score < newScoreEntry.score) {
+              previousScores[index] = newScoreEntry;
+            }
+          } else if (props.rankingOrder === RankingOrder.Descending) {
+            if (previousEntry.score > newScoreEntry.score) {
+              previousScores[index] = newScoreEntry;
+            }
+          }
+        }
+
+        if (props.rankingType === RankingType.Incremental) {
+          previousScores[index].score =
+            previousScores[index].score + newScoreEntry.score;
+        }
+
+        if (props.rankingType === RankingType.Decremental) {
+          previousScores[index].score =
+            previousScores[index].score - newScoreEntry.score;
+        }
+      } else {
+        queryClient.setQueryData(["scores"], (old: ScoreEntry[]) => {
+          if (old) {
+            return [...old, newScoreEntry];
+          }
+          return [newScoreEntry];
+        });
       }
-      return [newScore];
-    });
+    }
 
     // Return a context object with the snapshotted value
     return { previousScores };

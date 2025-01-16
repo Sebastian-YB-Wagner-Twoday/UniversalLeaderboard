@@ -7,7 +7,7 @@ let contests: Contest[];
 
 const pagination = 0;
 
-const data = await fetch(`http://localhost:5212/users/contests/${pagination}`, {
+const data = await fetch(`http://localhost:5212/user/contests/${pagination}`, {
   method: "GET",
   headers: {
     "Content-Type": "application/json",

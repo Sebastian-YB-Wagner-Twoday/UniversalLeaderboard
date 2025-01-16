@@ -1,4 +1,4 @@
-import type { App } from "vue";
+import { reactive, type App } from "vue";
 import {
   QueryClient,
   VueQueryPlugin,

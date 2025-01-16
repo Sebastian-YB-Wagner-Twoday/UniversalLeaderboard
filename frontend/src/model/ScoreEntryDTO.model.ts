@@ -1,5 +1,5 @@
-export interface ScoreEntry<T> {
+export interface ScoreEntryDTO {
   contestId: string;
   userId: string;
-  score: T;
+  score: number;
 }

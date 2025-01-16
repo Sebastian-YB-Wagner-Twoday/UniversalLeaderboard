@@ -10,13 +10,15 @@ import {
 } from "@/components/ui/table";
 import type { Contest } from "@/model/Contest.model";
 import type { ScoreEntry } from "@/model/ScoreEntry.model";
+import type { LeaderBoardUser } from "@/model/LeaderBoardUser.model";
 import { FlexRender, getCoreRowModel, useVueTable } from "@tanstack/vue-table";
 import ScoreForm from "./ScoreForm.vue";
 
-import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import { useQuery } from "@tanstack/vue-query";
 
 const props = defineProps<{
   contest: Contest;
+  user: LeaderBoardUser | null;
 }>();
 
 const fetchScores = async (): Promise<ScoreEntry[]> => {
@@ -31,9 +33,6 @@ const fetchScores = async (): Promise<ScoreEntry[]> => {
 
   return await response.json();
 };
-
-// Get QueryClient from the context
-const queryClient = useQueryClient();
 
 const { isPending, isError, data, error } = useQuery({
   queryKey: ["scores"],
@@ -58,7 +57,13 @@ const table = useVueTable({
 
 <template>
   <div class="border rounded-md">
-    <ScoreForm :contestId="contest.id" />
+    <ScoreForm
+      :v-if="user !== null"
+      :user="user"
+      :contestId="contest.id"
+      :rankingType="contest.rankingType"
+      :rankingOrder="contest.rankingOrder"
+    />
     <Table>
       <TableHeader>
         <TableRow

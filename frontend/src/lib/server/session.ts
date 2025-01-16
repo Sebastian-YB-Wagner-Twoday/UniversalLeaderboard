@@ -1,3 +1,4 @@
+import type { LeaderBoardUser } from "@/model/LeaderBoardUser.model";
 import type { APIContext } from "astro";
 
 export async function validateSessionToken(
@@ -8,14 +9,28 @@ export async function validateSessionToken(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Cookie: token,
+      Authorization: "Bearer " + token || "",
     },
     body: JSON.stringify({
       refreshToken,
     }),
   });
 
-  return session.json().catch((e) => "");
+  return session
+    .json()
+    .catch((e) => console.log("Session cant be refreshed: ", e));
+}
+
+export async function getLoggedInUser(token: string): Promise<LeaderBoardUser> {
+  const user = await fetch("http://localhost:5212/user", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token || "",
+    },
+  });
+
+  return user.json().catch((e) => console.log("User info can't be found: ", e));
 }
 
 export function setSessionTokenCookie(
