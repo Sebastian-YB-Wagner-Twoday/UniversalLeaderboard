@@ -3,6 +3,10 @@ import Layout from "../layouts/Layout.astro";
 import Dashboard from "../components/Dashboard.astro";
 import background from "../assets/background.svg";
 import "@/styles/globals.css";
+import { user } from "@/lib/store/userStore";
+import { Button } from "@/components/ui/button";
+
+const leaderBoardUser = user.get().user;
 ---
 
 <Layout>
@@ -13,6 +17,14 @@ import "@/styles/globals.css";
     fetchpriority="high"
   />
   <main>
-    <Dashboard />
+    {
+      leaderBoardUser ? (
+        <Dashboard />
+      ) : (
+        <a href="/login">
+          <Button>Go to login</Button>
+        </a>
+      )
+    }
   </main>
 </Layout>

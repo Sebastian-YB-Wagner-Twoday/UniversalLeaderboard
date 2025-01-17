@@ -54,11 +54,14 @@ const { isPending, isError, error, isSuccess, mutate } = useMutation({
   onMutate: async (newScoreEntry) => {
     // Cancel any outgoing refetches
     // (so they don't overwrite our optimistic update)
-    await queryClient.cancelQueries({ queryKey: ["scores"] });
+    await queryClient.cancelQueries({
+      queryKey: ["scores", { id: props.contestId }],
+    });
 
     // Snapshot the previous value
     const previousScores: ScoreEntry[] | undefined = queryClient.getQueryData([
       "scores",
+      props.contestId,
     ]);
 
     if (previousScores) {
@@ -66,54 +69,80 @@ const { isPending, isError, error, isSuccess, mutate } = useMutation({
         (scoreEntry) => scoreEntry.userId === newScoreEntry.userId
       );
 
-      console.log(previousEntry);
-
       if (previousEntry) {
         const index = previousScores.indexOf(previousEntry);
+        const customEntry = structuredClone(previousEntry);
+        customEntry.id = "";
 
-        if (props.rankingType === RankingType.HighScore) {
-          if (props.rankingOrder === RankingOrder.Ascending) {
-            if (previousEntry.score < newScoreEntry.score) {
-              previousScores[index] = newScoreEntry;
+        switch (props.rankingType) {
+          case RankingType.HighScore:
+            if (props.rankingOrder === RankingOrder.Ascending) {
+              if (previousEntry.score < newScoreEntry.score) {
+                previousScores[index] = newScoreEntry;
+              }
+            } else if (props.rankingOrder === RankingOrder.Descending) {
+              if (previousEntry.score > newScoreEntry.score) {
+                previousScores[index] = newScoreEntry;
+              }
             }
-          } else if (props.rankingOrder === RankingOrder.Descending) {
-            if (previousEntry.score > newScoreEntry.score) {
-              previousScores[index] = newScoreEntry;
-            }
-          }
-        }
+            break;
 
-        if (props.rankingType === RankingType.Incremental) {
-          previousScores[index].score =
-            previousScores[index].score + newScoreEntry.score;
-        }
+          case RankingType.Incremental:
+            customEntry.score =
+              previousScores[index].score + newScoreEntry.score;
 
-        if (props.rankingType === RankingType.Decremental) {
-          previousScores[index].score =
-            previousScores[index].score - newScoreEntry.score;
+            console.log(customEntry);
+            previousScores[index] = customEntry;
+            break;
+
+          case RankingType.Decremental:
+            customEntry.score =
+              previousScores[index].score - newScoreEntry.score;
+
+            console.log(customEntry);
+            previousScores[index] = customEntry;
+            break;
+
+          default:
+            break;
         }
-      } else {
-        queryClient.setQueryData(["scores"], (old: ScoreEntry[]) => {
+      }
+
+      queryClient.setQueryData(
+        ["scores", { id: props.contestId }],
+        () => previousScores
+      );
+
+      console.log(previousScores);
+    } else {
+      queryClient.setQueryData(
+        ["scores", { id: props.contestId }],
+        (old: ScoreEntry[]) => {
           if (old) {
             return [...old, newScoreEntry];
           }
           return [newScoreEntry];
-        });
-      }
+        }
+      );
     }
 
     // Return a context object with the snapshotted value
-    return { previousScores };
+    return { newScoreEntry };
   },
   // If the mutation fails,
   // use the context returned from onMutate to roll back
-  onError: (err, newScore, context) => {
+  onError: (err, newScoreEntry, context) => {
     console.log("error ", err);
-    queryClient.setQueryData(["scores"], context?.previousScores);
+    queryClient.setQueryData(
+      ["scores", { id: props.contestId }],
+      context?.newScoreEntry
+    );
   },
   // Always refetch after error or success:
   onSettled: () => {
-    queryClient.invalidateQueries({ queryKey: ["scores"] });
+    queryClient.invalidateQueries({
+      queryKey: ["scores", { id: props.contestId }],
+    });
   },
 });
 </script>

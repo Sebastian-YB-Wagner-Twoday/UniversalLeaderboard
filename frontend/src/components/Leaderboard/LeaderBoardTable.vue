@@ -33,24 +33,22 @@ const fetchScores = async (): Promise<ScoreEntry[]> => {
 };
 
 const { isPending, isError, data, error } = useQuery({
-  queryKey: ["scores"],
-  queryFn: fetchScores,
+  queryKey: ["scores", { id: props.contest.id }],
+  queryFn: () => fetchScores(),
 });
-
-const fallbackData: ScoreEntry[] = [];
 
 const shownColumns = columns(props.contest.scoreType);
 
 const table = useVueTable({
   get data() {
-    return data.value ?? fallbackData;
+    return data.value ?? [];
   },
-  get columns() {
-    return shownColumns;
-  },
+  columns: shownColumns,
 
   getCoreRowModel: getCoreRowModel(),
 });
+
+console.log(data.value);
 </script>
 
 <template>
