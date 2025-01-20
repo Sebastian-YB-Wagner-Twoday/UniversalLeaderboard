@@ -6,8 +6,13 @@ import LoginCard from "@/components/auth/LoginCard.vue";
 import { user } from "@/lib/store/userStore";
 import RegisterCard from "@/components/auth/RegisterCard.vue";
 import { Button } from "@/components/ui/button";
+import LogoutButton from "@/components/auth/LogoutButton.vue";
 
 const leaderBoardUser = user.get().user
+
+if(leaderBoardUser){  
+  return Astro.redirect("/")
+}
 
 ---
 
@@ -22,11 +27,11 @@ const leaderBoardUser = user.get().user
     {
       leaderBoardUser ?       
       <div>
-        {"Welcome " + leaderBoardUser?.userName}
-
         <a href="/">
             <Button>Go to Dashboard</Button>
         </a>
+        <LogoutButton client:load/>
+
       </div>
       :
       <LoginCard client:load />

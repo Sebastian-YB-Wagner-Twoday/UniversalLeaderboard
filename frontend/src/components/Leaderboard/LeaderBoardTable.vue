@@ -23,7 +23,9 @@ const props = defineProps<{
 }>();
 
 const fetchScores = async (): Promise<ScoreEntry[]> => {
-  const response = await get(`api/leaderboard/${props.contest.id}`);
+  const response = await get(
+    `${window.location.origin}/api/leaderboard/${props.contest.id}`
+  );
 
   if (!response.ok) {
     throw new Error("there was an error");

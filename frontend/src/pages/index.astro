@@ -5,8 +5,13 @@ import background from "../assets/background.svg";
 import "@/styles/globals.css";
 import { user } from "@/lib/store/userStore";
 import { Button } from "@/components/ui/button";
+import LogoutButton from "@/components/auth/LogoutButton.vue";
 
 const leaderBoardUser = user.get().user;
+
+if(!leaderBoardUser){
+  return Astro.redirect("/login")
+}
 ---
 
 <Layout>
@@ -19,6 +24,7 @@ const leaderBoardUser = user.get().user;
   <main>
     {
       leaderBoardUser ? (
+        <LogoutButton client:load/>
         <Dashboard />
       ) : (
         <a href="/login">

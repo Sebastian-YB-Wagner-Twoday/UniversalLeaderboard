@@ -59,30 +59,39 @@ const { isPending, isError, error, isSuccess, mutate } = useMutation({
     });
 
     // Snapshot the previous value
-    const previousScores: ScoreEntry[] | undefined = queryClient.getQueryData([
+    let previousScores: ScoreEntry[] | undefined = queryClient.getQueryData([
       "scores",
-      props.contestId,
+      { id: props.contestId },
     ]);
 
     if (previousScores) {
+      let newScores = [...previousScores];
+
       const previousEntry = previousScores.find(
         (scoreEntry) => scoreEntry.userId === newScoreEntry.userId
       );
 
       if (previousEntry) {
         const index = previousScores.indexOf(previousEntry);
-        const customEntry = structuredClone(previousEntry);
-        customEntry.id = "";
+        const customEntry = {
+          id: "",
+          score: newScoreEntry.score,
+          userId: props.user.id,
+          contestId: props.contestId,
+          userName: props.user.userName,
+          relatedScoreEntries: [],
+          date: new Date(),
+        };
 
         switch (props.rankingType) {
           case RankingType.HighScore:
             if (props.rankingOrder === RankingOrder.Ascending) {
               if (previousEntry.score < newScoreEntry.score) {
-                previousScores[index] = newScoreEntry;
+                newScores[index] = newScoreEntry;
               }
             } else if (props.rankingOrder === RankingOrder.Descending) {
               if (previousEntry.score > newScoreEntry.score) {
-                previousScores[index] = newScoreEntry;
+                newScores[index] = newScoreEntry;
               }
             }
             break;
@@ -91,16 +100,15 @@ const { isPending, isError, error, isSuccess, mutate } = useMutation({
             customEntry.score =
               previousScores[index].score + newScoreEntry.score;
 
-            console.log(customEntry);
-            previousScores[index] = customEntry;
+            newScores.splice(index, 1, customEntry);
+
             break;
 
           case RankingType.Decremental:
             customEntry.score =
               previousScores[index].score - newScoreEntry.score;
 
-            console.log(customEntry);
-            previousScores[index] = customEntry;
+            newScores.splice(index, 1, customEntry);
             break;
 
           default:
@@ -108,17 +116,17 @@ const { isPending, isError, error, isSuccess, mutate } = useMutation({
         }
       }
 
+      console.log(newScores);
+
       queryClient.setQueryData(
         ["scores", { id: props.contestId }],
-        () => previousScores
+        () => newScores
       );
-
-      console.log(previousScores);
     } else {
       queryClient.setQueryData(
         ["scores", { id: props.contestId }],
         (old: ScoreEntry[]) => {
-          if (old) {
+          if (old.length > 0) {
             return [...old, newScoreEntry];
           }
           return [newScoreEntry];

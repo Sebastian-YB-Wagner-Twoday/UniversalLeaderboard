@@ -21,7 +21,7 @@ export const POST: APIRoute = async ({ cookies, request, locals }) => {
     password: password,
   };
 
-  const response = await post("http://localhost:5212/register", body);
+  const response = post("http://localhost:5212/register", body);
 
   return response;
 };

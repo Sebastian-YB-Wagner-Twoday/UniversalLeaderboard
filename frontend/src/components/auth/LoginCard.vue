@@ -14,7 +14,7 @@ async function submit(e: Event) {
 
   const login = await post("/api/login", { email, password });
 
-  console.log(login.json());
+  return login.json();
 }
 </script>
 

@@ -30,7 +30,7 @@ export const POST: APIRoute = async ({ cookies, request, locals }) => {
 
   locals.session = sessionData;
   const today = new Date();
-  today.setMinutes(today.getHours() + (sessionData.expiresIn ?? 0));
+  today.setMinutes(today.getMinutes() + (sessionData.expiresIn ?? 0));
 
   cookies.set("session", sessionData.accessToken ?? "", {
     httpOnly: true,
@@ -48,5 +48,6 @@ export const POST: APIRoute = async ({ cookies, request, locals }) => {
     path: "/",
   });
 
-  return new Response();
+  const okResponse = new Response(null, { status: 200 });
+  return okResponse;
 };

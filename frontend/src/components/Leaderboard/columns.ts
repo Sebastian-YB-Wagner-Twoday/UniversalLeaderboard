@@ -25,7 +25,6 @@ export const columns = (scoreType: ScoreType): ColumnDef<ScoreEntry>[] => {
         const formatted = new Intl.NumberFormat("en", {
           maximumFractionDigits: 3,
         }).format(score);
-
         return h("div", { class: "text-right font-medium" }, formatted);
       },
     });
