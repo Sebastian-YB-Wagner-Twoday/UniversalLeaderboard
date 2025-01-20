@@ -15,8 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument(config =>
 {
     config.DocumentName = "UniversalLeaderboardAPI";
-    config.Title = "UniversalLeaderboardAPI v0.1";
-    config.Version = "v0.1";
+    config.Title = "UniversalLeaderboardAPI v0.2";
+    config.Version = "v0.2";
 });
 
 var app = builder.Build();
@@ -120,7 +120,6 @@ user.MapGet("/contests/{pagination}", async (int pagination, UniversalLeaderboar
 
 var contestItems = app.MapGroup("/contest");
 
-//TODO: Delete
 contestItems.MapGet("/", async (UniversalLeaderboardDb db) =>
     await db.Contests.ToListAsync());
 

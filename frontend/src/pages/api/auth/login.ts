@@ -1,5 +1,5 @@
 import { post } from "@/lib/api/http";
-import type { Session } from "@/model/Session.model";
+import type { Session } from "@/model/user/Session.model";
 import type { APIRoute } from "astro";
 
 export const POST: APIRoute = async ({ cookies, request, locals }) => {

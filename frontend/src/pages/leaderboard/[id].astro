@@ -1,23 +1,36 @@
 ---
+export const prerender = true;
+
+import type { GetStaticPaths } from "astro";
 import Layout from "../../layouts/Layout.astro";
 import background from "../../assets/background.svg";
 import "@/styles/globals.css";
 import LeaderBoard from "@/components/Leaderboard/LeaderBoard.astro";
-import type { Contest } from "@/model/Contest.model";
+import type { Contest } from "@/model/contest/Contest.model";
 import { get } from "@/lib/api/http";
 
-let contest: Contest;
+export async function getStaticPaths() {
+  let contests: Contest[];
+
+  const contestListdata = await get(`http://localhost:5212/contest`);
+
+  contests = await contestListdata.json();
+  console.log(contests);
+
+  return contests.map((contest) => {
+    return { params: { id: contest.id } };
+  });
+}
 
 const { id } = Astro.params;
 
-const data = await get(
-  `http://localhost:5212/contest/${id}`,
-  Astro.cookies.get("session")?.value
-);
+let contest: Contest;
+
+const data = await get(`http://localhost:5212/contest/${id}`);
 
 contest = await data
   .json()
-  .catch((e) => console.log("couldn't fetch list: ", e));
+  .catch((e) => console.log("couldn't fetch contest: ", e));
 
 // No posts found with this ID
 if (!contest) {

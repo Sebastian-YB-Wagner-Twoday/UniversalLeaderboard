@@ -1,5 +1,5 @@
 ---
-import type { Contest } from "@/model/Contest.model";
+import type { Contest } from "@/model/contest/Contest.model";
 import LeaderBoardTable from "./LeaderBoardTable.vue";
 import { user } from "@/lib/store/userStore";
 import { get } from "@/lib/api/http";
@@ -19,5 +19,6 @@ const contest: Contest = await get(
 
 <div>
   <h1>{contest.name}</h1>
+  {contest.description ? <p>{contest.description}</p> : ""}
   <LeaderBoardTable contest={contest} user={user.get().user} client:load />
 </div>

@@ -1,5 +1,5 @@
-import type { ScoreEntry } from "@/model/ScoreEntry.model";
-import { ScoreType } from "@/model/ScoreType.model";
+import type { ScoreEntry } from "@/model/scores/ScoreEntry.model";
+import { ScoreType } from "@/model/scores/ScoreType.model";
 import type { ColumnDef } from "@tanstack/vue-table";
 import { h } from "vue";
 

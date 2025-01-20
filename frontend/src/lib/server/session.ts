@@ -1,4 +1,4 @@
-import type { LeaderBoardUser } from "@/model/LeaderBoardUser.model";
+import type { LeaderBoardUser } from "@/model/user/LeaderBoardUser.model";
 import type { APIContext } from "astro";
 import { get, post } from "../api/http";
 

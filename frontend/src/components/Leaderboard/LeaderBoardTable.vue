@@ -8,9 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Contest } from "@/model/Contest.model";
-import type { ScoreEntry } from "@/model/ScoreEntry.model";
-import type { LeaderBoardUser } from "@/model/LeaderBoardUser.model";
+import type { Contest } from "@/model/contest/Contest.model";
+import type { ScoreEntry } from "@/model/scores/ScoreEntry.model";
+import type { LeaderBoardUser } from "@/model/user/LeaderBoardUser.model";
 import { FlexRender, getCoreRowModel, useVueTable } from "@tanstack/vue-table";
 import ScoreForm from "./ScoreForm.vue";
 
@@ -54,6 +54,7 @@ const table = useVueTable({
 <template>
   <div class="border rounded-md">
     <ScoreForm
+      v-if="user !== null"
       :user="user"
       :contestId="contest.id"
       :rankingType="contest.rankingType"

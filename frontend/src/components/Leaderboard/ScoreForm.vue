@@ -3,10 +3,10 @@ import { ref } from "vue";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQueryClient, useMutation } from "@tanstack/vue-query";
-import type { ScoreEntry } from "@/model/ScoreEntry.model";
-import type { LeaderBoardUser } from "@/model/LeaderBoardUser.model";
-import { RankingType } from "@/model/RankingType.model";
-import { RankingOrder } from "@/model/RankingOrder.model";
+import type { ScoreEntry } from "@/model/scores/ScoreEntry.model";
+import type { LeaderBoardUser } from "@/model/user/LeaderBoardUser.model";
+import { RankingType } from "@/model/contest/RankingType.model";
+import { RankingOrder } from "@/model/contest/RankingOrder.model";
 import { post } from "@/lib/api/http";
 
 const props = defineProps<{
@@ -20,10 +20,10 @@ const queryClient = useQueryClient();
 
 const responseMessage = ref<string>();
 
-async function postScore(variables: ScoreEntry) {
+async function postScore(scoreEntry: ScoreEntry) {
   const response = await post("/api/createScore", {
-    score: variables.score,
-    contestId: variables.contestId,
+    score: scoreEntry.score,
+    contestId: scoreEntry.contestId,
   });
 
   const data = await response.json();

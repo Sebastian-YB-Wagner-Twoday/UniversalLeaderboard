@@ -6,7 +6,7 @@ import { post } from "@/lib/api/http";
 async function logout(e: Event) {
   e.preventDefault();
 
-  const login = await post("/api/logout", {});
+  const login = await post("/api/auth/logout", {});
   return login.json;
 }
 </script>

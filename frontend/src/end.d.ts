@@ -6,6 +6,6 @@ declare namespace App {
   // Note: 'import {} from ""' syntax does not work in .d.ts files.
   interface Locals {
     session: Session | null;
-    user: import("./model/LeaderBoardUser.model").LeaderBoardUser | null;
+    user: import("./model/user/LeaderBoardUser.model").LeaderBoardUser | null;
   }
 }

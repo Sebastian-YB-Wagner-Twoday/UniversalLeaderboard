@@ -1,4 +1,4 @@
-import type { LeaderBoardUser } from "@/model/LeaderBoardUser.model";
+import type { LeaderBoardUser } from "@/model/user/LeaderBoardUser.model";
 import { atom, map } from "nanostores";
 
 export const isLoggedIn = atom(false);
