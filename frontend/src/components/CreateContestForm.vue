@@ -13,6 +13,8 @@ async function submit(e: Event) {
 
   const data = await response.json();
   responseMessage.value = data.message;
+
+  window.location.href = `/leaderboard/${data.id}`;
 }
 </script>
 
