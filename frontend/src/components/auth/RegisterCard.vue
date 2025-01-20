@@ -12,9 +12,7 @@ async function submit(e: Event) {
   const email = formData.get("email")?.valueOf();
   const password = formData.get("password")?.valueOf();
 
-  const login = await post("/api/register", { email, password });
-
-  console.log(login.json());
+  await post("/api/register", { email, password });
 }
 </script>
 

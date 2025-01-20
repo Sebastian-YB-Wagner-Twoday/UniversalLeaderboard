@@ -49,8 +49,6 @@ const table = useVueTable({
 
   getCoreRowModel: getCoreRowModel(),
 });
-
-console.log(data.value);
 </script>
 
 <template>

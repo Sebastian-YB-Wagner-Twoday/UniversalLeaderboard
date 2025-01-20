@@ -116,8 +116,6 @@ const { isPending, isError, error, isSuccess, mutate } = useMutation({
         }
       }
 
-      console.log(newScores);
-
       queryClient.setQueryData(
         ["scores", { id: props.contestId }],
         () => newScores
