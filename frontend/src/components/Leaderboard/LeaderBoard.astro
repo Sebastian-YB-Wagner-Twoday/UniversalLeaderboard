@@ -18,5 +18,6 @@ const contest: Contest = await get(
 ---
 
 <div>
+  <h1>{contest.name}</h1>
   <LeaderBoardTable contest={contest} user={user.get().user} client:load />
 </div>

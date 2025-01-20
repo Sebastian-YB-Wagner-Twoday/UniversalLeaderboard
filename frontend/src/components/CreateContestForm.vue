@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { postForm } from "@/lib/api/http";
 
 const responseMessage = ref<string>();

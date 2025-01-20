@@ -35,14 +35,14 @@ if (app.Environment.IsDevelopment())
 app.MapIdentityApi<LeaderBoardUser>();
 
 
-app.MapPost("/registerUsername", async (string userName, ApplicationDbContext appdb, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
+app.MapPost("/registerUsername", async (UserNameDTO userName, ApplicationDbContext appdb, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
 {
     var loggedInUser = await userManager.GetUserAsync(principal);
     var user = await appdb.Users.FindAsync(loggedInUser?.Id);
 
     if (user is not null)
     {
-        user.UserName = userName;
+        user.UserName = userName.UserName;
         await appdb.SaveChangesAsync();
         return Results.Ok();
     }
@@ -105,7 +105,8 @@ user.MapGet("/contests/{pagination}", async (int pagination, UniversalLeaderboar
                 RankingOrder = contest.RankingOrder,
                 ScoreType = contest.ScoreType,
             });
-        };
+        }
+        ;
 
         return Results.Ok(returnContests);
     }

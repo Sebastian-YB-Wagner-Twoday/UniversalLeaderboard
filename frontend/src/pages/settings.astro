@@ -1,0 +1,38 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import background from "@/assets/background.svg";
+import "@/styles/globals.css";
+import { user } from "@/lib/store/userStore";
+import { Button } from "@/components/ui/button";
+import LogoutButton from "@/components/auth/LogoutButton.vue";
+import SelectUsername from "@/components/settings/SelectUsername.vue";
+
+const leaderBoardUser = user.get().user;
+
+if (!leaderBoardUser) {
+  return Astro.redirect("/login");
+}
+---
+
+<Layout>
+  <img
+    class="fixed top-0 left-0 w-screen h-full -z-10 blur-md"
+    src={background.src}
+    alt=""
+    fetchpriority="high"
+  />
+  <main>
+    {
+      (
+        <div>
+          <a href="/">
+            <Button>Go to Dashboard</Button>
+          </a>
+          <LogoutButton client:load />
+
+          <SelectUsername client:load />
+        </div>
+      )
+    }
+  </main>
+</Layout>
