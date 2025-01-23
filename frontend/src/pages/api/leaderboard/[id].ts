@@ -18,7 +18,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
     `http://localhost:5212/contest/${contestId}/scores`
   );
 
-  locals.cache(60);
+  locals.cache(7200);
 
   return response;
 };

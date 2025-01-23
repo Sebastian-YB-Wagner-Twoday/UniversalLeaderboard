@@ -43,9 +43,6 @@ const table = useVueTable({
 
   getCoreRowModel: getCoreRowModel(),
 });
-
-refetch();
-console.log(props.user);
 </script>
 
 <template>

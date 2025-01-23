@@ -149,6 +149,7 @@ contestItems.MapGet("/{id}", async (string id, UniversalLeaderboardDb db) =>
 
 contestItems.MapGet("/{id}/scores", async (string id, UniversalLeaderboardDb db, ApplicationDbContext appdb) =>
 {
+    Thread.Sleep(2000);
     var contest = await db.Contests.FindAsync(new Guid(id));
 
     if (contest != null)
