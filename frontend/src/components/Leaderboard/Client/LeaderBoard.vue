@@ -1,39 +1,44 @@
 <script setup lang="ts">
 import type { Contest } from "@/model/contest/Contest.model";
 import type { ScoreEntry } from "@/model/scores/ScoreEntry.model";
-import type { LeaderBoardUser } from "@/model/user/LeaderBoardUser.model";
 import LeaderBoardTable from "../LeaderBoardTable.vue";
-import ScoreForm from "../ScoreForm.vue";
 import { useQuery } from "@tanstack/vue-query";
 import { useVueTable, getCoreRowModel } from "@tanstack/vue-table";
 import { columns } from "../columns";
 import { get } from "@/lib/api/http";
+import { queryClient } from "@/lib/store/queryStore";
 
 const props = defineProps<{
   contest: Contest;
   scores: ScoreEntry[] | undefined;
-  user: LeaderBoardUser | null;
 }>();
 
 const shownColumns = columns(props.contest.scoreType);
 
+const HOST = import.meta.env.VITE_ASTRO_HOST ?? window.location.origin;
+
+console.log("checker: ", `${HOST}/api/leaderboard/${props.contest.id}`);
+
 const fetchScores = async (): Promise<ScoreEntry[]> => {
-  const response = await get(
-    `${window.location.origin}/api/leaderboard/${props.contest.id}`
-  );
+  const response = await get(`${HOST}/api/leaderboard/${props.contest.id}`);
 
   if (!response.ok) {
     throw new Error("there was an error");
   }
 
+  console.log("fetchScores");
+
   return await response.json();
 };
 
-const { isPending, isError, data, error, refetch } = useQuery({
-  queryKey: ["scores", { id: props.contest.id }],
-  queryFn: () => fetchScores(),
-  initialData: props.scores ?? undefined,
-});
+const { isPending, isError, data, error, refetch } = useQuery(
+  {
+    queryKey: ["scores", { id: props.contest.id }],
+    queryFn: () => fetchScores(),
+    initialData: props.scores ?? undefined,
+  },
+  queryClient.get()
+);
 
 const table = useVueTable({
   get data() {
@@ -46,12 +51,5 @@ const table = useVueTable({
 </script>
 
 <template>
-  <ScoreForm
-    v-if="props.user !== null"
-    :user="props.user"
-    :contestId="props.contest.id"
-    :rankingType="props.contest.rankingType"
-    :rankingOrder="props.contest.rankingOrder"
-  />
   <LeaderBoardTable :table="table" :isPending :error></LeaderBoardTable>
 </template>

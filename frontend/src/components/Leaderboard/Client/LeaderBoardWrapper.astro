@@ -3,15 +3,14 @@ import type { Contest } from "@/model/contest/Contest.model";
 import { user } from "@/lib/store/userStore";
 import { get } from "@/lib/api/http";
 import type { ScoreEntry } from "@/model/scores/ScoreEntry.model";
-import ClientLeaderBoard from "./ClientLeaderBoard.vue";
+import LeaderBoard from "./LeaderBoard.vue";
+import ScoreFormWrapper from "./ScoreFormWrapper.astro";
 
 interface Props {
   contestId: string;
 }
 
 const { contestId } = Astro.props;
-
-let leaderBoardUser = user.get().user;
 
 const contest: Contest = await get(
   `http://localhost:5212/contest/${contestId}`
@@ -30,10 +29,6 @@ scores = await get(`${Astro.url.origin}/api/leaderboard/${contestId}`).then(
 <div>
   <h1>{contest.name}</h1>
   {contest.description ? <p>{contest.description}</p> : ""}
-  <ClientLeaderBoard
-    contest={contest}
-    scores={scores}
-    user={leaderBoardUser}
-    client:idle={{ timeout: 500 }}
-  />
+  <ScoreFormWrapper contest={contest} server:defer />
+  <LeaderBoard contest={contest} scores={scores} client:load />
 </div>

@@ -4,7 +4,7 @@ import background from "../../assets/background.svg";
 import "@/styles/globals.css";
 import type { Contest } from "@/model/contest/Contest.model";
 import { get } from "@/lib/api/http";
-import ClientLeaderBoardWrapper from "@/components/Leaderboard/Client/ClientLeaderBoardWrapper.astro";
+import LeaderBoardWrapper from "@/components/Leaderboard/Client/LeaderBoardWrapper.astro";
 
 let contests: Contest[];
 
@@ -40,7 +40,7 @@ if (!contest) {
   <main>
     <div>
       <div>
-        <ClientLeaderBoardWrapper contestId={contest.id} server:defer />
+        <LeaderBoardWrapper contestId={contest.id} />
       </div>
     </div>
   </main>
