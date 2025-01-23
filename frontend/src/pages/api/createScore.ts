@@ -1,4 +1,5 @@
 import { post } from "@/lib/api/http";
+import { invalidate } from "@/lib/services/isr";
 import type { APIRoute } from "astro";
 
 export const POST: APIRoute = async ({ cookies, request }) => {
@@ -20,6 +21,9 @@ export const POST: APIRoute = async ({ cookies, request }) => {
     score: score,
     contestId: contestId,
   };
+
+  invalidate(`/leaderboard/${contestId}`);
+  invalidate(`/api/leaderboard/${contestId}`);
 
   const response = await post(
     "http://localhost:5212/contest/submitScore",

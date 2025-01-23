@@ -7,5 +7,7 @@ declare namespace App {
   interface Locals {
     session: Session | null;
     user: import("./model/user/LeaderBoardUser.model").LeaderBoardUser | null;
+    // This will allow us to set the cache duration for each page.
+    cache(seconds: number): void;
   }
 }

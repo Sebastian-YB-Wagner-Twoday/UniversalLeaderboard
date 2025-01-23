@@ -1,8 +1,8 @@
 ---
 import CreateContestForm from "./CreateContestForm.vue";
 import type { Contest } from "../model/contest/Contest.model";
-import LeaderBoard from "./Leaderboard/LeaderBoard.astro";
 import { get } from "@/lib/api/http";
+import ClientLeaderBoardWrapper from "./Leaderboard/Client/ClientLeaderBoardWrapper.astro";
 
 let contests: Contest[];
 
@@ -26,7 +26,7 @@ contests = await data
       contests
         ? contests.map((contest) => (
             <div>
-              <LeaderBoard contestId={contest.id} />
+              <ClientLeaderBoardWrapper contestId={contest.id} />
             </div>
           ))
         : ""

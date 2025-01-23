@@ -1,26 +1,18 @@
 ---
-export const prerender = true;
-
-import type { GetStaticPaths } from "astro";
 import Layout from "../../layouts/Layout.astro";
 import background from "../../assets/background.svg";
 import "@/styles/globals.css";
-import LeaderBoard from "@/components/Leaderboard/LeaderBoard.astro";
 import type { Contest } from "@/model/contest/Contest.model";
 import { get } from "@/lib/api/http";
+import ClientLeaderBoardWrapper from "@/components/Leaderboard/Client/ClientLeaderBoardWrapper.astro";
 
-export async function getStaticPaths() {
-  let contests: Contest[];
+let contests: Contest[];
 
-  const contestListdata = await get(`http://localhost:5212/contest`);
+const contestListdata = await get(`http://localhost:5212/contest`);
 
-  contests = await contestListdata.json();
-  console.log(contests);
+contests = await contestListdata.json();
 
-  return contests.map((contest) => {
-    return { params: { id: contest.id } };
-  });
-}
+Astro.locals.cache(60);
 
 const { id } = Astro.params;
 
@@ -48,7 +40,7 @@ if (!contest) {
   <main>
     <div>
       <div>
-        <LeaderBoard contestId={contest.id} />
+        <ClientLeaderBoardWrapper contestId={contest.id} />
       </div>
     </div>
   </main>

@@ -1,8 +1,9 @@
 ---
 import type { Contest } from "@/model/contest/Contest.model";
-import LeaderBoardTable from "./LeaderBoardTable.vue";
 import { user } from "@/lib/store/userStore";
 import { get } from "@/lib/api/http";
+import type { ScoreEntry } from "@/model/scores/ScoreEntry.model";
+import ClientLeaderBoard from "./ClientLeaderBoard.vue";
 
 interface Props {
   contestId: string;
@@ -10,15 +11,29 @@ interface Props {
 
 const { contestId } = Astro.props;
 
+let leaderBoardUser = user.get().user;
+
 const contest: Contest = await get(
   `http://localhost:5212/contest/${contestId}`
 ).then((response) =>
   response.json().catch((e) => console.log("there was an error: ", e))
+);
+
+let scores: ScoreEntry[] | undefined = undefined;
+
+scores = await get(`${Astro.url.origin}/api/leaderboard/${contestId}`).then(
+  (response) =>
+    response.json().catch((e) => console.log("there was an error: ", e))
 );
 ---
 
 <div>
   <h1>{contest.name}</h1>
   {contest.description ? <p>{contest.description}</p> : ""}
-  <LeaderBoardTable contest={contest} user={user.get().user} client:load />
+  <ClientLeaderBoard
+    contest={contest}
+    scores={scores}
+    user={leaderBoardUser}
+    client:idle={{ timeout: 500 }}
+  />
 </div>
