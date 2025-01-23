@@ -31,7 +31,7 @@ const fetchScores = async (): Promise<ScoreEntry[]> => {
   return await response.json();
 };
 
-const { isPending, isError, data, error, refetch } = useQuery(
+const { isPending, data, error } = useQuery(
   {
     queryKey: ["scores", { id: props.contest.id }],
     queryFn: () => fetchScores(),
