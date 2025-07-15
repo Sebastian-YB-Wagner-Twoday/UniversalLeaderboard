@@ -27,11 +27,11 @@ async function submit(e: Event) {
       <div>
         <form @submit="submit" class="flex flex-row">
           <label>
-            Score
+            Email
             <Input id="email" type="email" name="email" placeholder="email" />
           </label>
           <label>
-            Score
+            Password
             <Input
               id="password"
               type="password"
