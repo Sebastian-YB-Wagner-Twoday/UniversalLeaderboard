@@ -3,43 +3,15 @@ import Layout from "../layouts/Layout.astro";
 import Dashboard from "../components/Dashboard.astro";
 import background from "../assets/background.svg";
 import "@/styles/globals.css";
+import { user } from "@/lib/store/userStore";
+import { Button } from "@/components/ui/button";
+import LogoutButton from "@/components/auth/LogoutButton.vue";
 
-const login = await fetch(
-  "http://localhost:5212/login?useCookies=false&useSessionCookies=false",
-  {
-    method: "POST",
-    body: JSON.stringify({
-      email: "seb@gmail.com",
-      password: "Dsadsa-1",
-    }),
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-  }
-);
+const leaderBoardUser = user.get().user;
 
-const sessionData = await login
-  .json()
-  .catch((e) => console.log("Couldn't login: ", e));
-
-Astro.locals.session = sessionData;
-const today = new Date();
-today.setMinutes(today.getHours() + (sessionData.expiresIn ?? 0));
-
-Astro.cookies.set("session", sessionData.accessToken ?? "", {
-  httpOnly: true,
-  sameSite: "lax",
-  secure: import.meta.env.PROD,
-  expires: today,
-  path: "/",
-});
-
-Astro.cookies.set("refresh", sessionData.refreshToken ?? "", {
-  httpOnly: true,
-  sameSite: "lax",
-  secure: import.meta.env.PROD,
-  expires: today,
-  path: "/",
-});
+if(!leaderBoardUser){
+  return Astro.redirect("/login")
+}
 ---
 
 <Layout>
@@ -50,6 +22,15 @@ Astro.cookies.set("refresh", sessionData.refreshToken ?? "", {
     fetchpriority="high"
   />
   <main>
-    <Dashboard />
+    {
+      leaderBoardUser ? (
+        <LogoutButton client:load/>
+        <Dashboard />
+      ) : (
+        <a href="/login">
+          <Button>Go to login</Button>
+        </a>
+      )
+    }
   </main>
 </Layout>

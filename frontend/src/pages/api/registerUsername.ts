@@ -1,14 +1,12 @@
 import { post } from "@/lib/api/http";
-import { invalidate } from "@/lib/services/isr";
 import type { APIRoute } from "astro";
 
 export const POST: APIRoute = async ({ cookies, request }) => {
-  const data = await request.json();
-  const score = data.score;
-  const contestId = data.contestId;
+  const data = await request.formData();
+  const username = data.get("username");
 
   // Validate the data - you'll probably want to do more than this
-  if (!score || !contestId) {
+  if (!username) {
     return new Response(
       JSON.stringify({
         message: "Missing required fields",
@@ -18,15 +16,11 @@ export const POST: APIRoute = async ({ cookies, request }) => {
   }
 
   const body = {
-    score: score,
-    contestId: contestId,
+    userName: username,
   };
 
-  invalidate(`/leaderboard/${contestId}`);
-  invalidate(`/api/leaderboard/${contestId}`);
-
   const response = await post(
-    "http://localhost:5212/contest/submitScore",
+    "http://localhost:5212/registerUsername/",
     body,
     cookies.get("session")?.value
   );

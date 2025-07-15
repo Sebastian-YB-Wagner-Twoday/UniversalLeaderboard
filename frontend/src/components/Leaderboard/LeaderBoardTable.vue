@@ -8,66 +8,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Contest } from "@/model/Contest.model";
-import type { ScoreEntry } from "@/model/ScoreEntry.model";
-import type { LeaderBoardUser } from "@/model/LeaderBoardUser.model";
-import { FlexRender, getCoreRowModel, useVueTable } from "@tanstack/vue-table";
-import ScoreForm from "./ScoreForm.vue";
-
-import { useQuery } from "@tanstack/vue-query";
+import type { ScoreEntry } from "@/model/scores/ScoreEntry.model";
+import { FlexRender } from "@tanstack/vue-table";
+import { type Table as TableType } from "@tanstack/vue-table";
 
 const props = defineProps<{
-  contest: Contest;
-  user: LeaderBoardUser | null;
+  table: TableType<ScoreEntry>;
+  isPending: boolean;
+  error: Error | null;
 }>();
-
-const fetchScores = async (): Promise<ScoreEntry[]> => {
-  const response = await fetch(`/leaderboard/${props.contest.id}`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
-
-  if (!response.ok) {
-    throw new Error("there was an error");
-  }
-
-  return await response.json();
-};
-
-const { isPending, isError, data, error } = useQuery({
-  queryKey: ["scores"],
-  queryFn: fetchScores,
-});
-
-const fallbackData: ScoreEntry[] = [];
-
-const shownColumns = columns(props.contest.scoreType);
-
-const table = useVueTable({
-  get data() {
-    return data.value ?? fallbackData;
-  },
-  get columns() {
-    return shownColumns;
-  },
-
-  getCoreRowModel: getCoreRowModel(),
-});
 </script>
 
 <template>
   <div class="border rounded-md">
-    <ScoreForm
-      :v-if="user !== null"
-      :user="user"
-      :contestId="contest.id"
-      :rankingType="contest.rankingType"
-      :rankingOrder="contest.rankingOrder"
-    />
     <Table>
       <TableHeader>
         <TableRow
-          v-for="headerGroup in table.getHeaderGroups()"
+          v-for="headerGroup in props.table.getHeaderGroups()"
           :key="headerGroup.id"
         >
           <TableHead v-for="header in headerGroup.headers" :key="header.id">
@@ -79,12 +36,12 @@ const table = useVueTable({
           </TableHead>
         </TableRow>
       </TableHeader>
-      <span v-if="isPending">Loading...</span>
-      <span v-else-if="isError">Error: {{ error?.message }}</span>
+      <span v-if="props.isPending">Loading...</span>
+      <span v-else-if="props.error">Error: {{ props.error?.message }}</span>
       <TableBody v-else>
-        <template v-if="table.getRowModel().rows?.length">
+        <template v-if="props.table.getRowModel().rows?.length">
           <TableRow
-            v-for="row in table.getRowModel().rows"
+            v-for="row in props.table.getRowModel().rows"
             :key="row.id"
             :data-state="row.getIsSelected() ? 'selected' : undefined"
           >

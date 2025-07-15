@@ -1,0 +1,28 @@
+---
+import type { Contest } from "@/model/contest/Contest.model";
+import { user } from "@/lib/store/userStore";
+import ScoreForm from "../ScoreForm.vue";
+let leaderBoardUser = user.get().user;
+
+interface Props {
+  contest: Contest;
+}
+
+const { contest } = Astro.props;
+---
+
+<div>
+  {
+    leaderBoardUser != null ? (
+      <ScoreForm
+        user={leaderBoardUser}
+        contestId={contest.id}
+        rankingType={contest.rankingType}
+        rankingOrder={contest.rankingOrder}
+        client:only
+      />
+    ) : (
+      ""
+    )
+  }
+</div>

@@ -15,8 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument(config =>
 {
     config.DocumentName = "UniversalLeaderboardAPI";
-    config.Title = "UniversalLeaderboardAPI v0.1";
-    config.Version = "v0.1";
+    config.Title = "UniversalLeaderboardAPI v0.2";
+    config.Version = "v0.2";
 });
 
 var app = builder.Build();
@@ -35,14 +35,14 @@ if (app.Environment.IsDevelopment())
 app.MapIdentityApi<LeaderBoardUser>();
 
 
-app.MapPost("/registerUsername", async (string userName, ApplicationDbContext appdb, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
+app.MapPost("/registerUsername", async (UserNameDTO userName, ApplicationDbContext appdb, UserManager<LeaderBoardUser> userManager, ClaimsPrincipal principal) =>
 {
     var loggedInUser = await userManager.GetUserAsync(principal);
     var user = await appdb.Users.FindAsync(loggedInUser?.Id);
 
     if (user is not null)
     {
-        user.UserName = userName;
+        user.UserName = userName.UserName;
         await appdb.SaveChangesAsync();
         return Results.Ok();
     }
@@ -105,7 +105,8 @@ user.MapGet("/contests/{pagination}", async (int pagination, UniversalLeaderboar
                 RankingOrder = contest.RankingOrder,
                 ScoreType = contest.ScoreType,
             });
-        };
+        }
+        ;
 
         return Results.Ok(returnContests);
     }
@@ -119,7 +120,6 @@ user.MapGet("/contests/{pagination}", async (int pagination, UniversalLeaderboar
 
 var contestItems = app.MapGroup("/contest");
 
-//TODO: Delete
 contestItems.MapGet("/", async (UniversalLeaderboardDb db) =>
     await db.Contests.ToListAsync());
 

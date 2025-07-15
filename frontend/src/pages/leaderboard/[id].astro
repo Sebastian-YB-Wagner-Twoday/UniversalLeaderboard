@@ -1,0 +1,47 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import background from "../../assets/background.svg";
+import "@/styles/globals.css";
+import type { Contest } from "@/model/contest/Contest.model";
+import { get } from "@/lib/api/http";
+import LeaderBoardWrapper from "@/components/Leaderboard/Client/LeaderBoardWrapper.astro";
+
+let contests: Contest[];
+
+const contestListdata = await get(`http://localhost:5212/contest`);
+
+contests = await contestListdata.json();
+
+Astro.locals.cache(60);
+
+const { id } = Astro.params;
+
+let contest: Contest;
+
+const data = await get(`http://localhost:5212/contest/${id}`);
+
+contest = await data
+  .json()
+  .catch((e) => console.log("couldn't fetch contest: ", e));
+
+// No posts found with this ID
+if (!contest) {
+  return Astro.redirect("/404");
+}
+---
+
+<Layout>
+  <img
+    class="fixed top-0 left-0 w-screen h-full -z-10 blur-md"
+    src={background.src}
+    alt=""
+    fetchpriority="high"
+  />
+  <main>
+    <div>
+      <div>
+        <LeaderBoardWrapper contestId={contest.id} />
+      </div>
+    </div>
+  </main>
+</Layout>

@@ -1,19 +1,17 @@
 ---
 import CreateContestForm from "./CreateContestForm.vue";
-import type { Contest } from "../model/Contest.model";
-import LeaderBoard from "./Leaderboard/LeaderBoard.astro";
+import type { Contest } from "../model/contest/Contest.model";
+import { get } from "@/lib/api/http";
+import LeaderBoardWrapper from "./Leaderboard/Client/LeaderBoardWrapper.astro";
 
 let contests: Contest[];
 
 const pagination = 0;
 
-const data = await fetch(`http://localhost:5212/user/contests/${pagination}`, {
-  method: "GET",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: "Bearer " + Astro.cookies.get("session")?.value || "",
-  },
-});
+const data = await get(
+  `http://localhost:5212/user/contests/${pagination}`,
+  Astro.cookies.get("session")?.value
+);
 
 contests = await data
   .json()
@@ -28,7 +26,7 @@ contests = await data
       contests
         ? contests.map((contest) => (
             <div>
-              <LeaderBoard contestId={contest.id} />
+              <LeaderBoardWrapper contestId={contest.id} />
             </div>
           ))
         : ""

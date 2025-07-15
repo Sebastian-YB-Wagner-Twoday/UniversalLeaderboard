@@ -1,0 +1,34 @@
+---
+import type { Contest } from "@/model/contest/Contest.model";
+import { user } from "@/lib/store/userStore";
+import { get } from "@/lib/api/http";
+import type { ScoreEntry } from "@/model/scores/ScoreEntry.model";
+import LeaderBoard from "./LeaderBoard.vue";
+import ScoreFormWrapper from "./ScoreFormWrapper.astro";
+
+interface Props {
+  contestId: string;
+}
+
+const { contestId } = Astro.props;
+
+const contest: Contest = await get(
+  `http://localhost:5212/contest/${contestId}`
+).then((response) =>
+  response.json().catch((e) => console.log("there was an error: ", e))
+);
+
+let scores: ScoreEntry[] | undefined = undefined;
+
+scores = await get(`${Astro.url.origin}/api/leaderboard/${contestId}`).then(
+  (response) =>
+    response.json().catch((e) => console.log("there was an error: ", e))
+);
+---
+
+<div>
+  <h1>{contest.name}</h1>
+  {contest.description ? <p>{contest.description}</p> : ""}
+  <ScoreFormWrapper contest={contest} server:defer />
+  <LeaderBoard contest={contest} scores={scores} client:load />
+</div>
