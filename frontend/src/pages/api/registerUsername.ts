@@ -20,7 +20,7 @@ export const POST: APIRoute = async ({ cookies, request }) => {
   };
 
   const response = await post(
-    "http://localhost:5212/registerUsername/",
+    `${import.meta.env.BACKEND_HOST}/registerUsername/`,
     body,
     cookies.get("session")?.value
   );

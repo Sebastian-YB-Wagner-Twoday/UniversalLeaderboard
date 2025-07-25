@@ -26,7 +26,7 @@ export const POST: APIRoute = async ({ cookies, request }) => {
   invalidate(`/api/leaderboard/${contestId}`);
 
   const response = await post(
-    "http://localhost:5212/contest/submitScore",
+    `${import.meta.env.BACKEND_HOST}/contest/submitScore`,
     body,
     cookies.get("session")?.value
   );

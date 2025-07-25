@@ -13,7 +13,7 @@ export const POST: APIRoute = async ({ cookies, locals }) => {
 
   cookies.delete("refresh", { secure: true, path: "/" });
 
-  await post("http://localhost:5212/logout", body, token);
+  await post(`${import.meta.env.BACKEND_HOST}/logout`, body, token);
 
   const okResponse = new Response(null, { status: 200 });
 

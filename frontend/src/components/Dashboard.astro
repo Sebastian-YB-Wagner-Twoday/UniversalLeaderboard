@@ -9,7 +9,7 @@ let contests: Contest[];
 const pagination = 0;
 
 const data = await get(
-  `http://localhost:5212/user/contests/${pagination}`,
+  `${import.meta.env.BACKEND_HOST}/user/contests/${pagination}`,
   Astro.cookies.get("session")?.value
 );
 

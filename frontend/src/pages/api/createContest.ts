@@ -28,7 +28,7 @@ export const POST: APIRoute = async ({ cookies, request }) => {
   };
 
   const response = await post(
-    "http://localhost:5212/contest",
+    `${import.meta.env.BACKEND_HOST}/contest`,
     body,
     cookies.get("session")?.value
   );

@@ -7,6 +7,9 @@ import { user } from "@/lib/store/userStore";
 import { Button } from "@/components/ui/button";
 import LogoutButton from "@/components/auth/LogoutButton.vue";
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+
 const leaderBoardUser = user.get().user;
 
 if(!leaderBoardUser){

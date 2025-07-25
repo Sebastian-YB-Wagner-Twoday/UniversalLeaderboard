@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ cookies, request, locals }) => {
     password: password,
   };
 
-  const response = await post("http://localhost:5212/login", body);
+  const response = await post(`${import.meta.env.BACKEND_HOST}/login`, body);
 
   const sessionData: Session = await response
     .json()

@@ -15,7 +15,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
   }
 
   const response = await get(
-    `http://localhost:5212/contest/${contestId}/scores`
+    `${import.meta.env.BACKEND_HOST}/contest/${contestId}/scores`
   );
 
   locals.cache(7200);

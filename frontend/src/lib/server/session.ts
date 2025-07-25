@@ -7,7 +7,7 @@ export async function validateSessionToken(
   refreshToken: string
 ): Promise<any> {
   const session = await post(
-    "http://localhost:5212/refresh",
+    `${import.meta.env.BACKEND_HOST}/refresh`,
     { refreshToken },
     token
   );
@@ -18,7 +18,7 @@ export async function validateSessionToken(
 }
 
 export async function getLoggedInUser(token: string): Promise<LeaderBoardUser> {
-  const user = await get("http://localhost:5212/user", token);
+  const user = await get(`${import.meta.env.BACKEND_HOST}/user`, token);
 
   return user.json().catch((e) => console.log("User info can't be found: ", e));
 }

@@ -21,7 +21,7 @@ export const POST: APIRoute = async ({ cookies, request, locals }) => {
     password: password,
   };
 
-  const response = post("http://localhost:5212/register", body);
+  const response = post(`${import.meta.env.BACKEND_HOST}/register`, body);
 
   return response;
 };

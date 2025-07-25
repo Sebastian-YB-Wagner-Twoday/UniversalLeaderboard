@@ -8,7 +8,7 @@ import LeaderBoardWrapper from "@/components/Leaderboard/Client/LeaderBoardWrapp
 
 let contests: Contest[];
 
-const contestListdata = await get(`http://localhost:5212/contest`);
+const contestListdata = await get(`${import.meta.env.BACKEND_HOST}/contest`);
 
 contests = await contestListdata.json();
 
@@ -18,7 +18,7 @@ const { id } = Astro.params;
 
 let contest: Contest;
 
-const data = await get(`http://localhost:5212/contest/${id}`);
+const data = await get(`${import.meta.env.BACKEND_HOST}/contest/${id}`);
 
 contest = await data
   .json()

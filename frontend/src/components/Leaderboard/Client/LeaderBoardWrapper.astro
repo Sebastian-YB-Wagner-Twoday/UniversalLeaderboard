@@ -13,7 +13,7 @@ interface Props {
 const { contestId } = Astro.props;
 
 const contest: Contest = await get(
-  `http://localhost:5212/contest/${contestId}`
+  `${import.meta.env.BACKEND_HOST}/contest/${contestId}`
 ).then((response) =>
   response.json().catch((e) => console.log("there was an error: ", e))
 );
